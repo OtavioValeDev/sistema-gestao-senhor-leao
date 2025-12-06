@@ -33,7 +33,7 @@ public class FuncionarioService {
                         funcionario.getNome() : funcionarioAntigo.getNome())
                 .email(funcionario.getEmail() != null ?
                         funcionario.getEmail() : funcionarioAntigo.getEmail())
-                .Turno(funcionario.getTurno() != null ?
+                .turno(funcionario.getTurno() != null ?
                         funcionario.getTurno() : funcionarioAntigo.getTurno())
                 .senha(funcionario.getSenha() != null ?
                         funcionario.getSenha() : funcionarioAntigo.getSenha())

@@ -19,7 +19,7 @@ public class FuncionarioController {
     @PostMapping("/create")
     public ResponseEntity<String> adicionarFuncionario(@RequestBody Funcionario funcionario){
         funcionarioService.create(funcionario);
-        return ResponseEntity.ok().body(funcionario + "Funcionario criado!");
+        return ResponseEntity.ok().body("Funcionario criado!");
     }
 
     @GetMapping("/{id}")

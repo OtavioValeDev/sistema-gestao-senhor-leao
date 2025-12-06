@@ -29,6 +29,5 @@ public class Funcionario {
     private String senha;
 
     @Column
-    @Enumerated(EnumType.STRING)
-    private Turno Turno;
+    private Turno turno;
 }
