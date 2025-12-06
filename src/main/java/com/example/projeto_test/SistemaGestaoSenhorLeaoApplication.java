@@ -26,7 +26,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * - Configura o banco de dados baseado no application.properties
  */
 @SpringBootApplication
-public class ProjetoTestApplication {
+public class SistemaGestaoSenhorLeaoApplication {
 
 	/**
 	 * Método principal - ponto de entrada da aplicação Java
@@ -44,7 +44,7 @@ public class ProjetoTestApplication {
 		// Inicia a aplicação Spring Boot
 		// O primeiro parâmetro é a classe principal (usada para configurar o contexto)
 		// O segundo parâmetro são os argumentos da linha de comando
-		SpringApplication.run(ProjetoTestApplication.class, args);
+		SpringApplication.run(SistemaGestaoSenhorLeaoApplication.class, args);
 	}
 
 }

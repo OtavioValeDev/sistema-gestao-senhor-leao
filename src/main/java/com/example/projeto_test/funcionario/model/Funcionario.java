@@ -18,16 +18,17 @@ public class Funcionario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String nome;
 
-    @Column
+    @Column(nullable = false, unique = true)
     @Email
     private String email;
 
-    @Column
+    @Column(nullable = false)
     private String senha;
 
-    @Column
+    @Column()
+    @Enumerated(EnumType.STRING)
     private Turno turno;
 }
