@@ -3,6 +3,7 @@ package com.example.projeto_test.funcionario.model;
 import com.example.projeto_test.funcionario.enuns.Turno;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 @Entity
@@ -31,4 +32,8 @@ public class Funcionario {
     @Column()
     @Enumerated(EnumType.STRING)
     private Turno turno;
+
+    @Column(nullable = false)
+    @PositiveOrZero
+    private double salario;
 }

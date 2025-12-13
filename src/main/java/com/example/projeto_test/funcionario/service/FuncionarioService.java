@@ -43,6 +43,8 @@ public class FuncionarioService {
                         funcionario.getTurno() : funcionarioAntigo.getTurno())
                 .senha(funcionario.getSenha() != null ?
                         funcionario.getSenha() : funcionarioAntigo.getSenha())
+                .salario(funcionario.getSalario() != 0 ?
+                        funcionario.getSalario() : funcionarioAntigo.getSalario())
                 .id(funcionarioAntigo.getId())
                 .build();
         return funcionarioRepo.save(funcionarioAtualizado);
