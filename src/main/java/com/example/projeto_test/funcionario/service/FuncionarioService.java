@@ -1,8 +1,10 @@
 package com.example.projeto_test.funcionario.service;
 
+import com.example.projeto_test.funcionario.exceptions.EmailAlreadyRegisteredException;
 import com.example.projeto_test.funcionario.model.Funcionario;
 import com.example.projeto_test.funcionario.repository.FuncionarioRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +16,11 @@ public class FuncionarioService {
     private final FuncionarioRepo funcionarioRepo;
 
     public void create(Funcionario funcionario){
+        try{
         funcionarioRepo.save(funcionario);
+        }catch(DataIntegrityViolationException e){
+            throw new EmailAlreadyRegisteredException("Email already registered");
+        }
     }
 
     public Funcionario findById(long id){
