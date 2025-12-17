@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Funcionários - Senhor Leão</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #fff6e9;
+            --card: #ffffff;
+            --primary: #ff6b00;
+            --secondary: #2c3e50;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(180deg, #fff 0%, #fff6e9 100%);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body class="bg-orange-50 min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-900 text-white p-4 shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="/logo_srLeao.png" alt="Logo" class="h-10 w-auto">
+                <span class="font-bold text-xl text-orange-500">Gestão de Funcionários</span>
+            </div>
+            <div>
+                <a href="/index.html" class="text-gray-300 hover:text-white transition">Voltar ao Início</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6">
+        <!-- Header & Actions -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Colaboradores</h1>
+                <p class="text-gray-600">Gerencie o time do Senhor Leão</p>
+            </div>
+            <button onclick="openModal()"
+                class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex items-center gap-2">
+                <i data-feather="user-plus"></i>
+                Novo Funcionário
+            </button>
+        </div>
+
+        <!-- Employee List -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-100 text-gray-600 uppercase text-sm font-bold">
+                        <tr>
+                            <th class="p-4">Nome</th>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Turno</th>
+                            <th class="p-4">Salário</th>
+                            <th class="p-4 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeTableBody" class="divide-y divide-gray-200">
+                        <!-- Rows will be populated by JS -->
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-gray-500">
+                                <div
+                                    class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-2">
+                                </div>
+                                Carregando equipe...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal (Create/Edit) -->
+    <div id="employeeModal" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden transform transition-all">
+            <div class="bg-gray-900 p-4 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i data-feather="user"></i>
+                    <span id="modalTitle">Novo Funcionário</span>
+                </h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white transition">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+
+            <form id="employeeForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="employeeId">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                    <input type="text" id="nome" required
+                        class="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-orange-500 focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" required
+                        class="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-orange-500 focus:outline-none transition">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Turno</label>
+                        <select id="turno" required
+                            class="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-orange-500 focus:outline-none transition bg-white">
+                            <option value="MANHA">Manhã</option>
+                            <option value="TARDE">Tarde</option>
+                            <option value="NOITE">Noite</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Salário (R$)</label>
+                        <input type="number" id="salario" required min="0" step="0.01"
+                            class="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-orange-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Senha (Acesso)</label>
+                    <input type="password" id="senha" required
+                        class="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-orange-500 focus:outline-none transition">
+                    <p class="text-xs text-gray-500 mt-1" id="senhaHelp">Necessária para login no sistema.</p>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 rounded-xl shadow-lg transition">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api/funcionarios';
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            loadEmployees();
+        });
+
+        // Load Employees
+        async function loadEmployees() {
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error('Erro ao carregar dados');
+                const employees = await res.json();
+                renderTable(employees);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('employeeTableBody').innerHTML = `
+                    <tr><td colspan="5" class="text-center text-red-500 p-4">Erro ao carregar funcionários. Tente recarregar.</td></tr>
+                `;
+            }
+        }
+
+        // Render Table
+        function renderTable(employees) {
+            const tbody = document.getElementById('employeeTableBody');
+            if (employees.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center p-8 text-gray-500">Nenhum funcionário cadastrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = employees.map(emp => `
+                <tr class="hover:bg-orange-50 transition group">
+                    <td class="p-4 font-medium text-gray-800">${emp.nome}</td>
+                    <td class="p-4 text-gray-600">${emp.email}</td>
+                    <td class="p-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 uppercase">
+                            ${emp.turno}
+                        </span>
+                    </td>
+                    <td class="p-4 text-gray-700 font-mono">R$ ${emp.salario.toFixed(2)}</td>
+                    <td class="p-4 text-center flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editEmployee(${emp.id})" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg" title="Editar">
+                            <i data-feather="edit-2" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteEmployee(${emp.id})" 
+                            class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg" title="Excluir">
+                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            feather.replace();
+        }
+
+        // Modal Logic
+        function openModal(employee = null) {
+            const modal = document.getElementById('employeeModal');
+            const form = document.getElementById('employeeForm');
+            const title = document.getElementById('modalTitle');
+
+            modal.classList.add('active');
+
+            if (employee) {
+                title.textContent = 'Editar Funcionário';
+                document.getElementById('employeeId').value = employee.id;
+                document.getElementById('nome').value = employee.nome;
+                document.getElementById('email').value = employee.email;
+                document.getElementById('turno').value = employee.turno;
+                document.getElementById('salario').value = employee.salario;
+                document.getElementById('senha').value = employee.senha; // Ideally wouldn't show raw password, but basic CRUD for now
+            } else {
+                title.textContent = 'Novo Funcionário';
+                form.reset();
+                document.getElementById('employeeId').value = '';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('employeeModal').classList.remove('active');
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('employeeId').value;
+            const data = {
+                nome: document.getElementById('nome').value,
+                email: document.getElementById('email').value,
+                turno: document.getElementById('turno').value,
+                salario: parseFloat(document.getElementById('salario').value),
+                senha: document.getElementById('senha').value
+            };
+
+            try {
+                const method = id ? 'PUT' : 'POST';
+                const url = id ? `${API_URL}/${id}` : API_URL;
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) throw new Error('Erro ao salvar');
+
+                closeModal();
+                loadEmployees();
+                alert('Salvo com sucesso!');
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao salvar funcionário. Verifique os dados.');
+            }
+        }
+
+        async function editEmployee(id) {
+            try {
+                const res = await fetch(`${API_URL}/${id}`);
+                const employee = await res.json();
+                openModal(employee);
+            } catch (err) {
+                alert('Erro ao buscar dados do funcionário.');
+            }
+        }
+
+        async function deleteEmployee(id) {
+            if (!confirm('Tem certeza que deseja excluir este funcionário?')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Erro ao excluir');
+                loadEmployees();
+            } catch (err) {
+                alert('Erro ao excluir funcionário.');
+            }
+        }
+    </script>
+</body>
+
+</html>

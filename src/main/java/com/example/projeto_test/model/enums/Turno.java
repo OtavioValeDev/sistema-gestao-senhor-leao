@@ -1,4 +1,4 @@
-package com.example.projeto_test.funcionario.enuns;
+package com.example.projeto_test.model.enums;
 
 public enum Turno {
 

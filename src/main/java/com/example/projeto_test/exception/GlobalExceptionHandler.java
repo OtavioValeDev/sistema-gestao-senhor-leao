@@ -62,5 +62,9 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
-}
 
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public ResponseEntity<String> EmailAlreadyRegisteredException(EmailAlreadyRegisteredException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+}

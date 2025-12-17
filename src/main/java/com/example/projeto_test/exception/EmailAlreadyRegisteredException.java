@@ -1,6 +1,6 @@
-package com.example.projeto_test.funcionario.exceptions;
+package com.example.projeto_test.exception;
 
-public class EmailAlreadyRegisteredException extends RuntimeException{
+public class EmailAlreadyRegisteredException extends RuntimeException {
     public EmailAlreadyRegisteredException() {
         super("Email already registered");
     }
@@ -17,7 +17,8 @@ public class EmailAlreadyRegisteredException extends RuntimeException{
         super(cause);
     }
 
-    public EmailAlreadyRegisteredException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public EmailAlreadyRegisteredException(String message, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }
