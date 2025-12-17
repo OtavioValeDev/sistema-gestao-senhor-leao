@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pedidos - Cliente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        /* Inlined CSS from style.css */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #fff6e9;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --accent: #ff6b00;
+            --accent-2: #ffd166;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --radius: 14px;
+            --shadow: 0 10px 30px rgba(15, 15, 15, 0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(180deg, #fff 0%, #fff6e9 100%);
+        }
+
+        /* Accessibility focus */
+        :focus {
+            outline: 3px solid rgba(255, 107, 0, 0.18);
+            outline-offset: 4px;
+        }
+
+        /* Product card hover effect */
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Animation for cart items */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cart-item {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        /* Preferential service styles */
+        .preferential-service-section {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+        }
+
+        .preferential-service-section h3 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .preferential-service-section p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 15px;
+        }
+
+        .preferential-button {
+            background: white;
+            color: #e67e22;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .preferential-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+
+        /* Receipt modal styles */
+        .receipt-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .receipt-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Preferential receipt modal */
+        .preferential-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .preferential-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Receipt number highlight */
+        .receipt-number {
+            font-size: 3rem !important;
+            font-weight: 800 !important;
+            color: #d35400;
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px dashed #d35400;
+            border-radius: 10px;
+            background-color: #fff6e9;
+        }
+
+        /* Print styles */
+        @media print {
+
+            /* Hide all direct children of body by default */
+            body>* {
+                display: none !important;
+            }
+
+            /* Only show the receipt modal */
+            .receipt-modal {
+                display: flex !important;
+                visibility: visible !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                z-index: 9999;
+                align-items: flex-start;
+                /* Align to top for printing */
+                justify-content: center;
+                padding-top: 20px;
+            }
+
+            /* Ensure modal content is visible and styled for print */
+            .receipt-content {
+                display: block !important;
+                visibility: visible !important;
+                box-shadow: none;
+                border: 2px solid #000;
+                width: 100%;
+                max-width: 400px;
+                position: static;
+                transform: none;
+                margin: 0 auto;
+            }
+
+            /* Also ensure preferential modal works if open */
+            #preferentialModal {
+                display: flex !important;
+            }
+
+            /* Hide interactive elements in print */
+            .print-button,
+            .close-button {
+                display: none !important;
+            }
+
+            /* Make receipt number extra visible in print */
+            .receipt-number {
+                font-size: 4rem !important;
+                border: 3px solid #000 !important;
+                color: #000 !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <main class="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-7xl space-y-8">
+            <!-- Header -->
+            <div class="text-center">
+                <div class="flex justify-center items-center mb-4">
+                    <img src="/logo_srLeao.png" alt="Sr. Leão" class="w-24 h-24" style="max-width: 96px; height: auto;">
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Área do Cliente</h1>
+                <p class="text-gray-600">Escolha seus produtos e faça seu pedido</p>
+            </div>
+
+            <!-- Content -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Products Section -->
+                    <section class="lg:w-3/4">
+                        <div class="controls mb-6">
+                            <div class="flex gap-2 mb-4">
+                                <div
+                                    class="search flex items-center gap-2 p-4 rounded-xl bg-orange-50 border-2 border-orange-100 flex-1">
+                                    <i data-feather="search" class="text-orange-600"></i>
+                                    <input id="searchInput" class="w-full bg-transparent outline-none text-gray-700"
+                                        placeholder="Pesquisar (ex: hambúrguer, batata)"
+                                        aria-label="Pesquisar produtos">
+                                </div>
+                                <button id="refreshProductsBtn"
+                                    class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-medium transition duration-200 flex items-center gap-2">
+                                    <i data-feather="refresh-cw" class="w-4 h-4"></i>
+                                    <span>Atualizar</span>
+                                </button>
+                            </div>
+                            <div class="categories flex gap-2 overflow-auto py-2">
+                                <!-- Categories will be populated by JS -->
+                            </div>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Escolha seus Produtos</h2>
+                        <div id="productsContainer">
+                            <!-- Products loading state -->
+                            <div class="text-center py-12 text-gray-500" id="productsLoadingState">
+                                <div
+                                    class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4">
+                                </div>
+                                Carregando produtos...
+                            </div>
+
+                            <!-- Products grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden" id="productsGrid">
+                                <!-- Products will be loaded here -->
+                            </div>
+
+                            <!-- Error state -->
+                            <div class="hidden text-center py-12" id="productsErrorState">
+                                <div class="text-red-500 mb-4">
+                                    <i data-feather="alert-circle" class="w-16 h-16 mx-auto mb-4"></i>
+                                    <h3 class="text-xl font-bold mb-2">Erro ao carregar produtos</h3>
+                                    <p class="mb-4">Não foi possível carregar o cardápio.</p>
+                                    <button onclick="retryLoadProducts()"
+                                        class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+                                        Tentar Novamente
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Empty state -->
+                            <div class="hidden text-center py-12 text-gray-500" id="productsEmptyState">
+                                <i data-feather="package" class="w-16 h-16 mx-auto mb-4 text-gray-300"></i>
+                                <h3 class="text-xl font-bold mb-2">Nenhum produto disponível</h3>
+                                <p>O cardápio está vazio no momento.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Cart Section -->
+                    <section class="lg:w-1/4">
+                        <div class="bg-gray-50 rounded-xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-xl font-bold text-gray-800">🛒 Seu Pedido</h2>
+                                <i data-feather="shopping-cart" class="text-gray-600"></i>
+                            </div>
+                            <div id="cart-items" class="mb-4">
+                                <!-- Cart items will appear here -->
+                            </div>
+                            <p class="text-gray-500 italic" id="empty-cart-message">Seu carrinho está vazio</p>
+                            <div class="border-t border-gray-200 pt-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="font-medium">Subtotal:</span>
+                                    <span class="font-bold" id="subtotal">R$0,00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-lg font-bold mb-6">
+                                    <span>Total:</span>
+                                    <span id="total">R$0,00</span>
+                                </div>
+                                <button id="checkout-btn"
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                    Finalizar Pedido
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Preferential Service Section -->
+                        <div class="mt-6 p-4 rounded-xl text-center">
+                            <img id="preferentialButton" src="/preferential-service.svg"
+                                alt="Acessibilidade - Atendimento Preferencial"
+                                class="cursor-pointer hover:opacity-90 hover:scale-105 transition-all duration-200 mx-auto shadow-md"
+                                style="width: 200px; height: 200px; border-radius: 25px;"
+                                onclick="requestPreferentialService()"
+                                title="Clique para solicitar atendimento preferencial">
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <custom-footer></custom-footer>
+
+    <!-- Modal -->
+    <div id="order-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Confirmação do Pedido</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <p class="mb-4 text-gray-600">Obrigado pelo seu pedido! Sua comida estará pronta em breve.</p>
+            <div id="order-summary" class="mb-6">
+                <!-- Order summary will appear here -->
+            </div>
+
+            <div class="mb-6">
+                <!-- Payment method selection removed. Now auto-defaults to Pix. -->
+                <h4 class="font-bold text-gray-800 mb-2">Forma de Pagamento</h4>
+                <div class="bg-blue-50 p-4 rounded-lg flex items-center gap-3">
+                    <img src="https://logopng.com.br/logos/pix-106.svg" alt="Pix" class="w-8 h-8">
+                    <span class="text-blue-900 font-bold">Pagamento via PIX</span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="orderObservations" class="font-bold text-gray-700">Observações (Opcional)</label>
+                <textarea id="orderObservations" rows="3"
+                    style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;"
+                    placeholder="Ex: Sem cebola, capricha no molho..."></textarea>
+            </div>
+
+            <button onclick="startPixPayment()"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                <span>Gerar Pix e Pagar</span>
+                <i data-feather="arrow-right"></i>
+            </button>
+            <button onclick="closeModal()"
+                class="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition duration-200">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
+    <!-- Pix Payment Modal -->
+    <div id="pixModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-[60]">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md text-center">
+            <h3 class="text-xl font-bold text-gray-800 mb-1">Pague com Pix</h3>
+            <p class="text-gray-500 text-sm mb-4">Escaneie o QR Code</p>
+
+            <div id="pixLoading" class="py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                <p class="mt-4 text-gray-500">Gerando cobrança...</p>
+            </div>
+
+            <div id="pixContent" class="hidden">
+                <div class="bg-gray-100 p-4 rounded-lg mb-4 inline-block">
+                    <img id="pixQrImage" src="" alt="QR Code Pix" class="w-48 h-48 mx-auto">
+                </div>
+
+                <div class="mb-6 hidden">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Pix Copia e Cola</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="pixCopyPaste" readonly
+                            class="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs">
+                        <button onclick="copyPixCode()"
+                            class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-xs font-bold">
+                            Copiar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-t pt-4">
+                    <div class="flex items-center justify-center gap-2 text-blue-600 mb-4 animate-pulse">
+                        <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+                        <span class="text-sm font-bold">Aguardando confirmação do banco...</span>
+                    </div>
+
+                    <button onclick="checkout(true)" class="text-xs text-gray-400 hover:text-gray-600 underline">
+                        Simular Pagamento (Teste)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="receipt-modal">
+        <div class="receipt-content">
+            <span class="close-button" onclick="closeReceiptModal()">&times;</span>
+
+            <div class="receipt-header">
+                <h2>🍔 Restaurante Senhor Leão</h2>
+                <p>Pedido Realizado com Sucesso!</p>
+            </div>
+
+            <div class="receipt-number" id="receiptNumber">
+                #0000
+            </div>
+
+            <div class="receipt-details" id="receiptDetails">
+                <!-- Receipt details will be populated here -->
+            </div>
+
+            <div
+                style="margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 8px; border: 1px solid #f0c674;">
+                <strong>📢 Importante:</strong><br>
+                Anote seu número de chamada e aguarde ser chamado no balcão.
+            </div>
+
+            <div class="flex flex-col gap-2 mt-4">
+                <button
+                    class="print-button bg-gray-800 text-white w-full py-3 rounded-lg font-bold hover:bg-gray-700 transition"
+                    onclick="window.print()">
+                    🖨️ Imprimir Recibo
+                </button>
+                <button onclick="window.location.reload()"
+                    class="print-button bg-orange-600 text-white w-full py-3 rounded-lg font-bold hover:bg-orange-700 transition">
+                    🔄 Fazer Novo Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // SISTEMA DE LOGGING MINIMALISTA
+        // ============================================================================
+        const Logger = {
+            enabled: true,
+
+            log: function (message, data = null) {
+                if (!this.enabled) return;
+                if (data) {
+                    console.log(`%c[INFO] ${message}`, 'color: #3b82f6; font-weight: bold', data);
+                } else {
+                    console.log(`%c[INFO] ${message}`, 'color: #3b82f6; font-weight: bold');
+                }
+            },
+
+            success: function (message, data = null) {
+                if (!this.enabled) return;
+                if (data) {
+                    console.log(`%c[SUCCESS] ${message}`, 'color: #10b981; font-weight: bold', data);
+                } else {
+                    console.log(`%c[SUCCESS] ${message}`, 'color: #10b981; font-weight: bold');
+                }
+            },
+
+            error: function (message, error = null) {
+                if (!this.enabled) return;
+                if (error) {
+                    console.error(`%c[ERROR] ${message}`, 'color: #ef4444; font-weight: bold', error);
+                } else {
+                    console.error(`%c[ERROR] ${message}`, 'color: #ef4444; font-weight: bold');
+                }
+            },
+
+            warn: function (message, data = null) {
+                if (!this.enabled) return;
+                if (data) {
+                    console.warn(`%c[WARN] ${message}`, 'color: #f59e0b; font-weight: bold', data);
+                } else {
+                    console.warn(`%c[WARN] ${message}`, 'color: #f59e0b; font-weight: bold');
+                }
+            },
+
+            group: function (title) {
+                if (!this.enabled) return;
+                console.group(`%c${title}`, 'color: #6366f1; font-weight: bold');
+            },
+
+            groupEnd: function () {
+                if (!this.enabled) return;
+                console.groupEnd();
+            }
+        };
+
+        // ============================================================================
+        // COMPONENTES
+        // ============================================================================
+        // Inlined navbar component
+        class CustomNavbar extends HTMLElement {
+            connectedCallback() {
+                this.attachShadow({ mode: 'open' });
+                this.shadowRoot.innerHTML = `
+            <style>
+              nav {
+                background-color: #111;
+                color: white;
+                padding: 1rem 2rem;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+              }
+
+              .nav-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              }
+
+              .logo {
+                font-size: 1.5rem;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              }
+              .logo-icon {
+                color: #ff6b00;
+              }
+              .cart-icon {
+                position: relative;
+                cursor: pointer;
+              }
+
+              .cart-count {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                background-color: #f97316;
+                color: white;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 12px;
+              }
+            </style>
+            <nav>
+              <div class="nav-container">
+                <div class="logo">
+                  <img src="/logo_srLeao.png" alt="Sr. Leão" style="width: 32px; height: 32px; margin-right: 8px; vertical-align: middle;">
+                  <span>Sistema de Gestão - Senhor Leão</span>
+                </div>
+                <div class="cart-icon">
+                  <i data-feather="shopping-cart"></i>
+                  <span class="cart-count" id="nav-cart-count">0</span>
+                </div>
+              </div>
+            </nav>
+          `;
+
+                document.addEventListener('cartUpdated', (e) => {
+                    const count = e.detail.count;
+                    this.shadowRoot.getElementById('nav-cart-count').textContent = count;
+                });
+            }
+        }
+        customElements.define('custom-navbar', CustomNavbar);
+        // Inlined footer component
+        class CustomFooter extends HTMLElement {
+            connectedCallback() {
+                this.attachShadow({ mode: 'open' });
+                this.shadowRoot.innerHTML = `
+            <style>
+              footer {
+                background-color: #111;
+                color: white;
+                padding: 2rem;
+                margin-top: 4rem;
+              }
+
+              .footer-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 2rem;
+              }
+
+              .footer-section h3 {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+                color: #f97316;
+              }
+
+              .footer-section ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+              }
+
+              .footer-section li {
+                margin-bottom: 0.5rem;
+              }
+
+              .footer-section a {
+                color: #ccc;
+                text-decoration: none;
+                transition: color 0.2s;
+              }
+
+              .footer-section a:hover {
+                color: white;
+              }
+
+              .social-icons {
+                display: flex;
+                gap: 1rem;
+              }
+
+              .social-icons a {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                background-color: #333;
+                border-radius: 50%;
+                color: white;
+                transition: background-color 0.2s;
+              }
+
+              .social-icons a:hover {
+                background-color: #f97316;
+              }
+
+              .copyright {
+                text-align: center;
+                margin-top: 3rem;
+                padding-top: 1rem;
+                border-top: 1px solid #333;
+                color: #999;
+                font-size: 0.9rem;
+              }
+            </style>
+            
+          `;
+            }
+        }
+        customElements.define('custom-footer', CustomFooter);
+
+        // Global variables
+        let availableProducts = [];
+        let cart = [];
+        // Use absolute URLs to avoid routing conflicts with static files
+        const API_BASE = window.location.protocol + '//' + window.location.host + '/api/products';
+        const API_FILTERS = window.location.protocol + '//' + window.location.host + '/api/filters';
+        const RECIBOS_API = window.location.protocol + '//' + window.location.host + '/api/recibos';
+        let currentFilters = [];
+
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                feather.replace();
+                init();
+            } catch (error) {
+                Logger.error('Falha na inicialização', error);
+            }
+        });
+
+        async function init() {
+            Logger.group('Inicialização');
+            try {
+                await loadFilters();
+                renderCategories();
+                renderCart();
+                setupEventListeners();
+                setupSearch();
+                await loadProducts();
+                Logger.success('Aplicação inicializada');
+            } catch (error) {
+                Logger.error('Erro na inicialização', error);
+                alert('Erro ao inicializar a aplicação: ' + error.message);
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+
+
+        function setupEventListeners() {
+            document.getElementById('checkout-btn').addEventListener('click', showOrderConfirmation);
+            // preferentialButton agora é uma imagem com onclick inline, não precisa de addEventListener
+            document.getElementById('refreshProductsBtn').addEventListener('click', refreshProducts);
+        }
+
+        // Product loading state management
+        function setProductsState(state) {
+            const loadingState = document.getElementById('productsLoadingState');
+            const grid = document.getElementById('productsGrid');
+            const errorState = document.getElementById('productsErrorState');
+            const emptyState = document.getElementById('productsEmptyState');
+
+            // Hide all states first
+            [loadingState, grid, errorState, emptyState].forEach(el => {
+                if (el) el.classList.add('hidden');
+            });
+
+            // Show the requested state
+            switch (state) {
+                case 'loading':
+                    if (loadingState) loadingState.classList.remove('hidden');
+                    break;
+                case 'loaded':
+                    if (grid) grid.classList.remove('hidden');
+                    break;
+                case 'error':
+                    if (errorState) errorState.classList.remove('hidden');
+                    Logger.error('Erro ao carregar produtos');
+                    break;
+                case 'empty':
+                    if (emptyState) emptyState.classList.remove('hidden');
+                    Logger.warn('Nenhum produto disponível');
+                    break;
+                default:
+                    Logger.warn(`Estado desconhecido: ${state}`);
+            }
+
+            feather.replace();
+        }
+
+        // Retry loading products
+        function retryLoadProducts() {
+            loadProducts();
+        }
+
+        // Load products from API
+        async function loadProducts() {
+            setProductsState('loading');
+            Logger.group('Carregando produtos');
+
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const responseText = await response.text();
+                availableProducts = JSON.parse(responseText);
+
+                Logger.success(`${availableProducts.length} produto(s) carregado(s)`);
+
+                if (availableProducts.length === 0) {
+                    setProductsState('empty');
+                } else {
+                    renderProducts();
+                    setProductsState('loaded');
+                }
+
+            } catch (error) {
+                Logger.error('Falha ao carregar produtos', error);
+                const fallbackSuccess = await loadProductsFallback();
+                if (!fallbackSuccess) {
+                    setProductsState('error');
+                }
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+
+        // Refresh products manually
+        async function refreshProducts() {
+            const btn = document.getElementById('refreshProductsBtn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i data-feather="refresh-cw" class="w-4 h-4 animate-spin"></i><span>Carregando...</span>';
+            feather.replace();
+
+            try {
+                await loadProducts();
+                // Temporarily show success state
+                btn.innerHTML = '<i data-feather="check" class="w-4 h-4"></i><span>Atualizado!</span>';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    feather.replace();
+                }, 1500);
+            } catch (error) {
+                Logger.error('Erro ao atualizar produtos', error);
+                btn.innerHTML = '<i data-feather="x" class="w-4 h-4"></i><span>Erro</span>';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    feather.replace();
+                }, 2000);
+            }
+        }
+
+        // Alternative product loading method (fallback)
+        async function loadProductsFallback() {
+            Logger.warn('Tentando método alternativo');
+            try {
+                const response = await fetch(API_BASE + '/cors-test', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                availableProducts = await response.json();
+                Logger.success(`Fallback: ${availableProducts.length} produto(s) carregado(s)`);
+
+                if (availableProducts.length === 0) {
+                    setProductsState('empty');
+                } else {
+                    renderProducts();
+                    setProductsState('loaded');
+                }
+                return true;
+            } catch (error) {
+                Logger.error('Fallback falhou', error);
+                return false;
+            }
+        }
+
+        function renderProducts(filteredProducts = availableProducts) {
+            const productsGrid = document.getElementById('productsGrid');
+
+            if (!productsGrid) {
+                Logger.error('Elemento productsGrid não encontrado');
+                return;
+            }
+
+            productsGrid.innerHTML = '';
+
+            if (filteredProducts.length === 0) {
+                productsGrid.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhum produto encontrado na busca.</div>';
+                return;
+            }
+
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-xl p-4 shadow-md border-2 border-transparent hover:border-orange-100 transition-all';
+                productCard.setAttribute('data-product-id', product.id);
+
+                const priceFormatted = (product.priceInCents / 100).toFixed(2).replace('.', ',');
+
+                const imageHtml = product.imageUrl
+                    ? `<img src="${product.imageUrl}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-3">`
+                    : `<div class="w-full h-48 bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg mb-3 flex items-center justify-center">
+                          <img src="/logo_srLeao.png" alt="Sr. Leão" class="w-20 h-20 opacity-50">
+                       </div>`;
+
+                productCard.innerHTML = `
+                  ${imageHtml}
+                  <div>
+                      <h3 class="font-bold text-lg mb-2 text-gray-800">${product.name}</h3>
+                      <p class="text-gray-600 text-sm mb-3">Delicioso prato do nosso cardápio</p>
+                      <div class="flex justify-between items-center">
+                          <span class="text-orange-600 font-bold text-lg">R$ ${priceFormatted}</span>
+                          <button class="add-to-cart-btn bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200"
+                                  data-product-id="${product.id}">
+                              Adicionar
+                          </button>
+                      </div>
+                  </div>
+              `;
+
+                // Add event listener to the button
+                const addButton = productCard.querySelector('.add-to-cart-btn');
+                addButton.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-product-id');
+                    console.log('Botão clicado, ID do produto:', productId);
+                    addToCart(productId);
+                });
+
+                productsGrid.appendChild(productCard);
+            });
+        }
+
+        async function loadFilters() {
+            try {
+                const response = await fetch(API_FILTERS);
+                if (response.ok) {
+                    currentFilters = await response.json();
+                }
+            } catch (e) {
+                Logger.error('Erro ao carregar filtros', e);
+            }
+        }
+
+        function renderCategories() {
+            const categoriesContainer = document.querySelector('.categories');
+            categoriesContainer.innerHTML = '';
+
+            // "Todos" button
+            const allChip = document.createElement('button');
+            allChip.className = 'chip px-4 py-2 rounded-full bg-orange-600 text-white font-medium text-sm transition-colors border border-transparent';
+            allChip.textContent = 'Todos';
+            allChip.onclick = () => {
+                setActiveChip(allChip);
+                renderProducts(availableProducts);
+            };
+            categoriesContainer.appendChild(allChip);
+
+            currentFilters.forEach(filter => {
+                const chip = document.createElement('button');
+                chip.className = 'chip px-4 py-2 rounded-full bg-orange-50 text-orange-600 font-medium text-sm hover:bg-orange-100 transition-colors border border-orange-100';
+                chip.textContent = filter.name;
+                chip.onclick = () => {
+                    setActiveChip(chip);
+                    filterByFilterId(filter.id);
+                };
+                categoriesContainer.appendChild(chip);
+            });
+        }
+
+        function setActiveChip(activeChip) {
+            document.querySelectorAll('.chip').forEach(c => {
+                c.classList.remove('bg-orange-600', 'text-white');
+                c.classList.add('bg-orange-50', 'text-orange-600');
+            });
+            activeChip.classList.remove('bg-orange-50', 'text-orange-600');
+            activeChip.classList.add('bg-orange-600', 'text-white');
+        }
+
+        function filterByFilterId(filterId) {
+            const filtered = availableProducts.filter(p =>
+                p.filters && p.filters.some(f => f.id === filterId)
+            );
+            if (filtered.length === 0) {
+                // Show empty message in grid
+                const grid = document.getElementById('productsGrid');
+                grid.innerHTML = '<div class="text-center py-8 text-gray-500 col-span-full">Nenhum produto encontrado nesta categoria.</div>';
+            } else {
+                renderProducts(filtered);
+            }
+        }
+
+
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = availableProducts.filter(p =>
+                    p.name.toLowerCase().includes(term)
+                );
+                renderProducts(filtered);
+            });
+        }
+
+        // Product selection functions
+        function selectProduct(productId) {
+            const product = availableProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            const quantity = getProductQuantity(productId);
+            if (quantity > 0) {
+                addToCart(product, quantity);
+                resetProductQuantity(productId);
+                updateProductCard(productId, false);
+            }
+        }
+
+        function increaseQuantity(productId) {
+            const qtyElement = document.getElementById(`qty-${productId}`);
+            const currentQty = parseInt(qtyElement.textContent);
+            qtyElement.textContent = currentQty + 1;
+            updateProductCard(productId, true);
+        }
+
+        function decreaseQuantity(productId) {
+            const qtyElement = document.getElementById(`qty-${productId}`);
+            const currentQty = parseInt(qtyElement.textContent);
+            if (currentQty > 0) {
+                qtyElement.textContent = currentQty - 1;
+                updateProductCard(productId, currentQty > 1);
+            }
+        }
+
+        function getProductQuantity(productId) {
+            const qtyElement = document.getElementById(`qty-${productId}`);
+            return parseInt(qtyElement.textContent);
+        }
+
+        function resetProductQuantity(productId) {
+            document.getElementById(`qty-${productId}`).textContent = '0';
+        }
+
+        function updateProductCard(productId, isSelected) {
+            const card = document.querySelector(`[data-id="${productId}"]`);
+            if (isSelected) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        }
+
+        // Make addToCart globally accessible
+        window.addToCart = function (productId) {
+            const product = availableProducts.find(p => p.id == productId || p.id === Number(productId));
+            if (!product) {
+                Logger.error(`Produto não encontrado (ID: ${productId})`);
+                return;
+            }
+
+            const existingItem = cart.find(item => item.productId == productId || item.productId === Number(productId));
+            if (existingItem) {
+                existingItem.quantity += 1;
+                Logger.log(`Quantidade atualizada: ${product.name} (${existingItem.quantity})`);
+            } else {
+                cart.push({
+                    productId: product.id,
+                    name: product.name,
+                    price: product.priceInCents,
+                    quantity: 1
+                });
+                Logger.success(`Adicionado: ${product.name}`);
+            }
+            renderCart();
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cart-items');
+            const emptyCartMessage = document.getElementById('empty-cart-message');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            if (!cartItems) {
+                Logger.error('Elemento cart-items não encontrado');
+                return;
+            }
+
+            // Limpar apenas os itens do carrinho, não a mensagem vazia
+            cartItems.innerHTML = '';
+
+            if (cart.length === 0) {
+                // Mostrar mensagem de carrinho vazio
+                if (emptyCartMessage) {
+                    emptyCartMessage.classList.remove('hidden');
+                }
+                if (checkoutBtn) {
+                    checkoutBtn.disabled = true;
+                }
+            } else {
+                // Esconder mensagem de carrinho vazio
+                if (emptyCartMessage) {
+                    emptyCartMessage.classList.add('hidden');
+                }
+                if (checkoutBtn) {
+                    checkoutBtn.disabled = false;
+                }
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item mb-3 pb-3 border-b border-gray-200';
+                    cartItem.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium">${item.name}</h4>
+                                <div class="flex items-center mt-1">
+                                    <button class="decrease-qty-btn text-gray-500 hover:text-gray-700 text-sm" data-product-id="${item.productId}">
+                                        <i data-feather="minus" class="w-4 h-4"></i>
+                                    </button>
+                                    <span class="mx-2 item-quantity" data-product-id="${item.productId}">${item.quantity}</span>
+                                    <button class="increase-qty-btn text-gray-500 hover:text-gray-700 text-sm" data-product-id="${item.productId}">
+                                        <i data-feather="plus" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-medium">R$${((item.price * item.quantity) / 100).toFixed(2).replace('.', ',')}</span>
+                                <button class="remove-item-btn text-red-500 hover:text-red-700 text-sm mt-1" data-product-id="${item.productId}">
+                                    Remover
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Add event listeners for cart item buttons
+                    const decreaseBtn = cartItem.querySelector('.decrease-qty-btn');
+                    const increaseBtn = cartItem.querySelector('.increase-qty-btn');
+                    const removeBtn = cartItem.querySelector('.remove-item-btn');
+
+                    decreaseBtn.addEventListener('click', function () {
+                        const productId = this.getAttribute('data-product-id');
+                        const item = cart.find(i => i.productId == productId || i.productId === Number(productId));
+                        if (item && item.quantity > 1) {
+                            updateQuantity(productId, item.quantity - 1);
+                        } else if (item && item.quantity === 1) {
+                            removeFromCart(productId);
+                        }
+                    });
+
+                    increaseBtn.addEventListener('click', function () {
+                        const productId = this.getAttribute('data-product-id');
+                        const item = cart.find(i => i.productId == productId || i.productId === Number(productId));
+                        if (item) {
+                            updateQuantity(productId, item.quantity + 1);
+                        }
+                    });
+
+                    removeBtn.addEventListener('click', function () {
+                        const productId = this.getAttribute('data-product-id');
+                        removeFromCart(productId);
+                    });
+
+                    cartItems.appendChild(cartItem);
+                });
+            }
+            updateTotals();
+            feather.replace();
+            // Dispatch event for navbar cart count
+            document.dispatchEvent(new CustomEvent('cartUpdated', {
+                detail: { count: cart.reduce((sum, item) => sum + item.quantity, 0) }
+            }));
+        }
+
+        // Make removeFromCart globally accessible
+        window.removeFromCart = function (productId) {
+            const index = cart.findIndex(item => item.productId == productId || item.productId === Number(productId));
+            if (index !== -1) {
+                const item = cart[index];
+                cart.splice(index, 1);
+                Logger.log(`Removido: ${item.name}`);
+            } else {
+                Logger.warn(`Item não encontrado no carrinho (ID: ${productId})`);
+            }
+            renderCart();
+            updateOrderButton();
+        }
+
+        // Make updateQuantity globally accessible
+        window.updateQuantity = function (productId, newQuantity) {
+            const item = cart.find(item => item.productId == productId || item.productId === Number(productId));
+            if (item) {
+                if (newQuantity <= 0) {
+                    removeFromCart(productId);
+                } else {
+                    item.quantity = newQuantity;
+                }
+            } else {
+                Logger.warn(`Item não encontrado para atualizar (ID: ${productId})`);
+            }
+            renderCart();
+        }
+
+        function updateTotals() {
+            // Calculate subtotal (which is also the total, no tax)
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            // Total is the same as subtotal (no tax)
+            const total = subtotal;
+
+            // Format currency function
+            const formatCurrency = (value) => {
+                return (value / 100).toFixed(2).replace('.', ',');
+            };
+
+            // Update DOM elements
+            document.getElementById('subtotal').textContent = 'R$' + formatCurrency(subtotal);
+            document.getElementById('total').textContent = 'R$' + formatCurrency(total);
+        }
+
+        function updateOrderButton() {
+            const button = document.getElementById('checkout-btn');
+            if (button) {
+                button.disabled = cart.length === 0;
+            }
+        }
+
+        function showOrderConfirmation() {
+            if (cart.length === 0) {
+                alert('Adicione pelo menos um produto ao seu pedido!');
+                return;
+            }
+
+            const orderModal = document.getElementById('order-modal');
+            const orderSummary = document.getElementById('order-summary');
+            let summaryHTML = '<div class="mb-4">';
+            cart.forEach(item => {
+                summaryHTML += `
+                    <div class="flex justify-between mb-1">
+                        <span>${item.name} x ${item.quantity}</span>
+                        <span>R$${((item.price * item.quantity) / 100).toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `;
+            });
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = subtotal; // No tax
+            summaryHTML += `</div>
+                <div class="border-t border-gray-200 pt-2">
+                    <div class="flex justify-between mb-1">
+                        <span>Subtotal:</span>
+                        <span>R$${(subtotal / 100).toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between font-bold mt-2">
+                        <span>Total:</span>
+                        <span>R$${(total / 100).toFixed(2).replace('.', ',')}</span>
+                    </div>
+                </div>
+            `;
+            orderSummary.innerHTML = summaryHTML;
+            orderModal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+
+        async function processOrder() {
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const originalText = checkoutBtn.textContent;
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = '⏳ Processando...';
+
+            try {
+                // Prepare order data
+                const itens = cart.map(item => ({
+                    nome: item.name,
+                    quantidade: item.quantity,
+                    preco: item.price
+                }));
+
+                // Get selected payment method
+                const selectedPaymentMethod = document.querySelector('input[name="payment-method"]:checked');
+                const formaPagamento = selectedPaymentMethod ? selectedPaymentMethod.value : "Dinheiro";
+
+                // Get observations
+                const obsInput = document.getElementById('orderObservations');
+                const userObs = obsInput ? obsInput.value.trim() : "";
+
+                const orderData = {
+                    itens: itens,
+                    observacoes: userObs,
+                    formaPagamento: formaPagamento
+                };
+
+                Logger.group('Processando pedido');
+                Logger.log(`Enviando ${itens.length} item(ns)`);
+
+                const response = await fetch(`${RECIBOS_API}/pagar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => 'Erro desconhecido');
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const receipt = await response.json();
+                Logger.success(`Pedido criado - Número: ${receipt.numeroChamada}`);
+
+                // Show receipt modal
+                showReceiptModal(receipt);
+
+                // Clear cart and close order modal
+                cart = [];
+                renderCart();
+                closeModal();
+                Logger.groupEnd();
+
+            } catch (error) {
+                Logger.error('Falha ao processar pedido', error);
+                Logger.groupEnd();
+                alert('Erro ao processar o pedido. Tente novamente.');
+            } finally {
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = originalText;
+            }
+        }
+
+        // Receipt modal functions
+        function showReceiptModal(receipt) {
+            document.getElementById('receiptNumber').textContent = `#${receipt.numeroChamada}`;
+
+            const detailsContainer = document.getElementById('receiptDetails');
+            let detailsHtml = '<div style="margin-bottom: 15px;">';
+
+            // Order date
+            if (receipt.dataCriacao) {
+                const date = new Date(receipt.dataCriacao);
+                detailsHtml += `<div><strong>Data:</strong> ${date.toLocaleString('pt-BR')}</div>`;
+            }
+
+            detailsHtml += '</div>';
+
+            // Items
+            detailsHtml += '<div><strong>Itens:</strong></div>';
+            receipt.itens.forEach(item => {
+                const subtotal = (item.quantidade * item.preco) / 100;
+                detailsHtml += `
+                    <div class="receipt-item">
+                        <span>${item.nome} × ${item.quantidade}</span>
+                        <span>R$ ${subtotal.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            // Total
+            const total = receipt.total / 100;
+            detailsHtml += `
+                <div class="receipt-total">
+                    <span>Total: R$ ${total.toFixed(2)}</span>
+                </div>
+            `;
+
+            // Payment method
+            if (receipt.formaPagamento) {
+                detailsHtml += `<div style="margin-top: 10px;"><strong>Pagamento:</strong> ${receipt.formaPagamento}</div>`;
+            }
+
+            // Notes
+            if (receipt.observacoes) {
+                detailsHtml += `<div style="margin-top: 10px;"><strong>Observações:</strong> ${receipt.observacoes}</div>`;
+            }
+
+            detailsContainer.innerHTML = detailsHtml;
+
+            // Show modal
+            document.getElementById('receiptModal').style.display = 'block';
+        }
+
+        function closeReceiptModal() {
+            // Em modo Kiosk/Terminal, o comportamento mais robusto é recarregar a página 
+            // para garantir que a memória esteja limpa para o próximo cliente.
+            window.location.reload();
+        }
+
+
+        // Preferential service - envia notificação direta para funcionário
+        async function requestPreferentialService() {
+            const button = document.getElementById('preferentialButton');
+            const originalOpacity = button.style.opacity;
+            const originalCursor = button.style.cursor;
+            button.style.opacity = '0.6';
+            button.style.cursor = 'not-allowed';
+            button.style.pointerEvents = 'none';
+            Logger.group('Solicitando atendimento preferencial');
+
+            try {
+                // Envia notificação simples sem pedir observações
+                const response = await fetch(API_BASE + '/notificacao-preferencial', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => 'Erro desconhecido');
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Logger.success(`Notificação enviada (ID: ${result.notificationId})`);
+                    alert('✅ Solicitação de atendimento preferencial enviada com sucesso!\n\nAguarde ser chamado pelo sistema de som.');
+                    // Mantém desabilitado após sucesso
+                    button.style.opacity = '0.5';
+                    button.title = 'Solicitação já enviada';
+                } else {
+                    throw new Error(result.message || 'Erro desconhecido');
+                }
+
+            } catch (error) {
+                Logger.error('Falha ao solicitar atendimento preferencial', error);
+                alert('❌ Erro ao solicitar atendimento preferencial: ' + error.message);
+                button.style.opacity = originalOpacity || '1';
+                button.style.cursor = originalCursor || 'pointer';
+                button.style.pointerEvents = 'auto';
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+
+        // Show preferential service receipt modal
+        function showPreferentialReceiptModal(receipt) {
+            // Create preferential modal
+            const modalHtml = `
+                <div id="preferentialModal" class="receipt-modal">
+                    <div class="receipt-content">
+                        <span class="close-button" onclick="closePreferentialModal()">&times;</span>
+
+                        <div class="receipt-header">
+                            <h2>⭐ ATENDIMENTO PREFERENCIAL</h2>
+                            <p>Solicitação Recebida com Prioridade!</p>
+                        </div>
+
+                        <div class="receipt-number" id="preferentialReceiptNumber">
+                            #${receipt.numeroChamada}
+                        </div>
+
+                        <div class="receipt-details" id="preferentialReceiptDetails">
+                            <div style="margin-bottom: 15px;">
+                                <div><strong>Data:</strong> ${new Date(receipt.dataCriacao).toLocaleString('pt-BR')}</div>
+                                <div><strong>Tipo:</strong> <span style="color: #e67e22; font-weight: bold;">ATENDIMENTO PREFERENCIAL</span></div>
+                            </div>
+
+                            <div><strong>Motivo:</strong></div>
+                            <div style="background: #fff3cd; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #f0c674;">
+                                ${receipt.observacoes}
+                            </div>
+
+                            <div style="margin: 20px 0; padding: 15px; background: #fff3cd; border-radius: 8px; border: 1px solid #f0c674;">
+                                <strong>⚡ ATENÇÃO:</strong><br>
+                                Seu atendimento terá prioridade. Anote seu número de chamada e aguarde ser chamado(a) pelo sistema de som.
+                            </div>
+
+                            <div style="margin: 20px 0; padding: 15px; background: #d4edda; border-radius: 8px; border: 1px solid #c3e6cb;">
+                                <strong>📢 Instruções:</strong><br>
+                                • Fique atento ao sistema de som<br>
+                                • Seu número será chamado em breve<br>
+                                • Dirija-se ao balcão quando chamado
+                            </div>
+                        </div>
+
+                        <button class="print-button" onclick="window.print()">
+                            🖨️ Imprimir Comprovante
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById('preferentialModal').style.display = 'block';
+        }
+
+        function closePreferentialModal() {
+            const modal = document.getElementById('preferentialModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Setup preferential service image (click handler is already in onclick attribute)
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const receiptModal = document.getElementById('receiptModal');
+            const preferentialModal = document.getElementById('preferentialModal');
+
+            if (event.target === receiptModal) {
+                closeReceiptModal();
+            }
+            if (preferentialModal && event.target === preferentialModal) {
+                closePreferentialModal();
+            }
+        }
+
+        // =================================================================
+        // MERCADO PAGO PIX LOGIC
+        // =================================================================
+
+        const PAYMENT_API = "http://localhost:8080/api/pagamento";
+        let currentPaymentId = null;
+        let paymentCheckInterval = null;
+
+        async function startPixPayment() {
+            // 1. Validate Cart
+            if (cart.length === 0) {
+                alert("Seu carrinho está vazio!");
+                return;
+            }
+
+            // RESET PAYMENT STATE (Crucial due to race conditions or previous errors)
+            currentPaymentId = null;
+            if (paymentCheckInterval) clearInterval(paymentCheckInterval);
+            paymentCheckInterval = null;
+            isCheckoutProcessing = false;
+            document.getElementById('pixContent').classList.remove('opacity-50');
+
+            // 2. Show Modal & Loading
+            document.getElementById('order-modal').style.display = 'none'; // Close confirmation
+            const modal = document.getElementById('pixModal');
+            modal.classList.remove('hidden');
+            document.getElementById('pixLoading').classList.remove('hidden');
+            document.getElementById('pixContent').classList.add('hidden');
+
+            // 3. Create Payment on Backend
+            try {
+                const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) / 100;
+
+                const response = await fetch(`${PAYMENT_API}/pix`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ valor: totalAmount })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error("❌ ERRO DETALHADO:", errorData);
+                    alert(`Erro no Pagamento: ${errorData.error || 'Verifique o console'}`);
+                    throw new Error(errorData.error || 'Falha ao gerar Pix');
+                }
+
+                const data = await response.json();
+                console.log("[SUCCESS] Pix Generated! ID:", data.id);
+                console.log("[INFO] QR Code Base64 (displaying...):", data.qr_code_base64 ? data.qr_code_base64.substring(0, 50) + "..." : "EMPTY");
+
+                // 4. Render QR Code
+                const serverQr = data.qr_code_base64;
+                const fallbackQr = "iVBORw0KGgoAAAANSUhEUgAAAJQAAACUCAQAAAB8N04MAAAAyklEQVR42u3TQQrAMAwDwX7J/39LTw70IAwEmx72Ea1Gg6v5d8T+I/Yfsf+I/UfsP2L/EfuP2H/E/iP2H7H/iP1H7D9i/xH7j9h/xP4j9h+x/4j9R+w/Yv8R+4/Yf8T+I/Yfsf+I/UfsP2L/EfuP2H/E/iP2H7H/iP1H7D9i/xH7j9h/xP4j9h+x/4j9R+w/Yv8R+4/Yf8T+I/Yfsf+I/UfsP2L/EfuP2H/E/iP2H/kBh3Rz5Qd4n48AAAAASUVORK5CYII=";
+
+                const finalSrc = "/qr-code.png";
+
+                console.log("[INFO] Using Illustrative QR Code (Local File)");
+
+                currentPaymentId = data.id;
+                const imgElement = document.getElementById('pixQrImage');
+
+                // Limpar handlers (importante para remover lógica antiga)
+                imgElement.onload = null;
+                imgElement.onerror = null;
+
+                imgElement.src = finalSrc;
+
+                document.getElementById('pixCopyPaste').value = data.qr_code;
+
+                document.getElementById('pixLoading').classList.add('hidden');
+                document.getElementById('pixContent').classList.remove('hidden');
+
+                // 5. Start Polling
+                startPaymentPolling();
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao gerar Pix. Tente novamente.");
+                modal.classList.add('hidden');
+            }
+        }
+
+        function copyPixCode() {
+            const input = document.getElementById('pixCopyPaste');
+            input.select();
+            document.execCommand('copy');
+            // Visual feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = "Copiado!";
+            setTimeout(() => btn.textContent = originalText, 2000);
+        }
+
+        function startPaymentPolling() {
+            if (paymentCheckInterval) clearInterval(paymentCheckInterval);
+
+            paymentCheckInterval = setInterval(async () => {
+                if (!currentPaymentId) return;
+
+                try {
+                    const response = await fetch(`${PAYMENT_API}/${currentPaymentId}/status`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.status === 'approved') {
+                            clearInterval(paymentCheckInterval);
+                            checkout(true); // Proceed to checkout
+                        }
+                    }
+                } catch (e) {
+                    console.error("Polling error", e);
+                }
+            }, 1000); // Check every 1 second
+        }
+
+        let isCheckoutProcessing = false;
+
+        async function checkout(isTestSimulation = false) {
+            if (isCheckoutProcessing) return; // Prevent double click or race condition
+
+            // Se for simulação, chamamos o endpoint que força o status "approved" no servidor
+            if (isTestSimulation && currentPaymentId) {
+                try {
+                    document.getElementById('pixContent').classList.add('opacity-50'); // Feedback visual
+                    // Stop polling immediately to avoid race condition
+                    if (paymentCheckInterval) clearInterval(paymentCheckInterval);
+
+                    await fetch(`${PAYMENT_API}/${currentPaymentId}/confirmar`, { method: 'POST' });
+
+                    // Instant finish
+                    document.getElementById('pixModal').classList.add('hidden');
+                    finishOrderProcess("Pix");
+                } catch (e) {
+                    console.error("Erro na simulação:", e);
+                }
+            } else {
+                // Fallback
+                document.getElementById('pixModal').classList.add('hidden');
+                finishOrderProcess("Pix");
+            }
+        }
+
+        async function finishOrderProcess(paymentMethod) {
+            if (isCheckoutProcessing) return;
+            isCheckoutProcessing = true;
+
+            // Get observations
+            const obsInput = document.getElementById('orderObservations');
+            const userObs = obsInput ? obsInput.value.trim() : "";
+
+            const itens = cart.map(item => ({
+                nome: item.name,
+                quantidade: item.quantity,
+                preco: item.price
+            }));
+
+            const orderData = {
+                itens: itens,
+                observacoes: userObs,
+                formaPagamento: paymentMethod
+            };
+
+            try {
+                const response = await fetch(`${RECIBOS_API}/pagar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const recibo = await response.json();
+
+                // Success!
+                cart = [];
+                renderCart();
+                showReceiptModal(recibo);
+
+            } catch (error) {
+                console.error('Error processing order:', error);
+                alert('Erro ao processar pedido. Por favor, tente novamente.');
+            } finally {
+                // Reset flag after delay to allow modal interaction but prevent immediate double-submit
+                setTimeout(() => { isCheckoutProcessing = false; }, 2000);
+            }
+        }
+    </script>
+</body>
+
+</html>
+```

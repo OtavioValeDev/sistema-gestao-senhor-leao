@@ -1,44 +1,54 @@
-// Declaração do pacote onde esta classe está localizada
-// O pacote organiza as classes em uma estrutura hierárquica
 package com.example.projeto_test;
+// ↑ Declara que esta classe pertence ao pacote principal do projeto
 
-// Importa a classe SpringApplication do Spring Boot
-// Esta classe é responsável por inicializar e executar a aplicação Spring Boot
+//   Este pacote contém toda a aplicação Spring Boot
+
 import org.springframework.boot.SpringApplication;
-
-// Importa a anotação @SpringBootApplication
-// Esta anotação combina três anotações importantes:
-// - @Configuration: Indica que a classe contém configurações do Spring
-// - @EnableAutoConfiguration: Habilita a configuração automática do Spring Boot
-// - @ComponentScan: Habilita a varredura de componentes (controllers, services, etc.)
+// ↑ Importa a classe SpringApplication do Spring Boot
+//   Responsável por inicializar toda a aplicação Spring
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+// ↑ Importa a anotação @SpringBootApplication
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
+// ↑ Imports adicionais para funcionalidades específicas
 
 /**
- * Classe principal da aplicação Spring Boot
- * 
- * Esta é a classe que inicia toda a aplicação. O Spring Boot procura por uma classe
- * com a anotação @SpringBootApplication e o método main para iniciar o servidor.
- * 
- * O Spring Boot automaticamente:
- * - Configura o servidor embutido (Tomcat por padrão)
- * - Configura o contexto da aplicação
- * - Escaneia e registra todos os componentes (@Controller, @Service, @Repository, etc.)
- * - Configura o banco de dados baseado no application.properties
+ * Classe principal da aplicação Spring Boot.
+ *
+ * Esta classe inicializa todo o sistema de gestão de restaurante,
+ * incluindo APIs REST para produtos e recibos, interface web
+ * e configuração automática do banco H2.
+ *
+ * Funcionalidades principais:
+ * - CRUD completo de produtos do cardápio
+ * - Sistema de recibos com números de chamada aleatórios
+ * - Interface web responsiva para gestão
+ * - APIs REST documentadas
+ *
+ * @author Sistema de Gestão de Restaurante
+ * @version 1.0
+ * @since 2025-01-01
  */
 @SpringBootApplication
 public class SistemaGestaoSenhorLeaoApplication {
 
 	/**
-	 * Método principal - ponto de entrada da aplicação Java
-	 * 
-	 * @param args Argumentos passados via linha de comando (não utilizados neste caso)
-	 * 
-	 * SpringApplication.run() faz o seguinte:
-	 * 1. Cria o contexto da aplicação Spring
-	 * 2. Carrega todas as configurações do application.properties
-	 * 3. Escaneia e registra todos os componentes (@Controller, @Service, etc.)
-	 * 4. Inicia o servidor web embutido (Tomcat na porta 8080 por padrão)
-	 * 5. A aplicação fica rodando até ser encerrada
+	 * Ponto de entrada da aplicação Java.
+	 *
+	 * Inicializa o Spring Boot que automaticamente:
+	 * - Configura servidor Tomcat embutido na porta 8080
+	 * - Carrega configurações do application.properties
+	 * - Escaneia e registra todos os componentes
+	 * (@Controller, @Service, @Repository)
+	 * - Inicializa banco H2 em memória
+	 * - Configura validações e tratamento de exceções
+	 *
+	 * @param args Argumentos da linha de comando (não utilizados)
 	 */
 	public static void main(String[] args) {
 		// Inicia a aplicação Spring Boot
@@ -47,4 +57,12 @@ public class SistemaGestaoSenhorLeaoApplication {
 		SpringApplication.run(SistemaGestaoSenhorLeaoApplication.class, args);
 	}
 
+	/**
+	 * Configuração adicional para CORS e endpoints de debug
+	 */
+	@Configuration // ← Indica que esta classe contém configurações
+	static class AdditionalConfig implements WebMvcConfigurer {
+		// Classe interna para configurações adicionais
+		// Permite customizar aspectos específicos da aplicação
+	}
 }

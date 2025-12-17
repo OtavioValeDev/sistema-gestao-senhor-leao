@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Funcionário - Gestão de Produtos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        /* Inlined CSS from style.css */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #fff6e9;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --accent: #ff6b00;
+            --accent-2: #ffd166;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --radius: 14px;
+            --shadow: 0 10px 30px rgba(15, 15, 15, 0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(180deg, #fff 0%, #fff6e9 100%);
+        }
+
+        /* Accessibility focus */
+        :focus {
+            outline: 3px solid rgba(255, 107, 0, 0.18);
+            outline-offset: 4px;
+        }
+
+        /* Form styling */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .add-button {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .add-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Products table styling */
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .products-table th,
+        .products-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .products-table th {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .products-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .products-table tr:hover {
+            background: #e3f2fd;
+        }
+
+        .product-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .product-price {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-button {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.3s;
+        }
+
+        .edit-button:hover {
+            background: #e67e22;
+        }
+
+        .delete-button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.3s;
+        }
+
+        .delete-button:hover {
+            background: #c0392b;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-button {
+            font-size: 28px;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+
+        .close-button:hover {
+            color: #e74c3c;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .modal-button.primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .modal-button.primary:hover {
+            background: #2980b9;
+        }
+
+        .modal-button.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .modal-button.secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Loading and empty states */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .products-table {
+                font-size: 0.9em;
+            }
+
+            .products-table th,
+            .products-table td {
+                padding: 8px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .edit-button,
+            .delete-button {
+                padding: 4px 8px;
+                font-size: 0.7em;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <main class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-6xl space-y-8">
+            <!-- Header -->
+            <div class="text-center">
+                <div class="flex justify-center items-center mb-4">
+                    <img src="/logo_srLeao.png" alt="Sr. Leão" class="w-24 h-24" style="max-width: 96px; height: auto;">
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Painel do Funcionário</h1>
+                <p class="text-gray-600">Gerencie os produtos do cardápio</p>
+            </div>
+
+            <!-- Content -->
+            <div class="space-y-8">
+                <!-- Notifications Section -->
+                <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold text-red-800 flex items-center">
+                            <span class="text-2xl mr-3">🔔</span>
+                            Notificações de Atendimento Preferencial
+                        </h2>
+                        <button
+                            class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+                            id="refreshNotifications">
+                            🔄 Atualizar
+                        </button>
+                    </div>
+                    <div id="notificationsContainer">
+                        <div class="text-center py-8 text-red-600">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-2"></div>
+                            Carregando notificações...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders/Receipts Section -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl border-l-4 border-orange-500">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <span class="text-3xl mr-3">🧾</span>
+                            Pedidos Recebidos
+                        </h2>
+                        <div class="flex gap-2">
+                            <button onclick="loadRecibos()"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center gap-2">
+                                <i data-feather="refresh-cw" class="w-4 h-4"></i>
+                                <span>Atualizar</span>
+                            </button>
+                            <button onclick="clearRecibosHistory()"
+                                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center gap-2">
+                                <i data-feather="trash-2" class="w-4 h-4"></i>
+                                <span>Limpar Histórico</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="recibosContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="text-center py-8 text-gray-500 col-span-full">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-2">
+                            </div>
+                            Carregando pedidos...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters Management Section -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="text-3xl mr-3">🏷️</span>
+                        Gerenciar Filtros
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Novo Filtro</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="newFilterName" placeholder="Ex: Bebidas, Lanches"
+                                    class="flex-1 border-2 border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:outline-none transition-colors">
+                                <button onclick="addFilter()"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                                    Adicionar
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filtros Ativos</label>
+                            <div id="filtersList" class="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg min-h-[50px]">
+                                <!-- Filters will be loaded here -->
+                                <span class="text-gray-400 text-sm italic p-2">Nenhum filtro cadastrado</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Product Section -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                        <span class="text-3xl mr-3">➕</span>
+                        Adicionar Novo Produto
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="productName" class="block text-sm font-medium text-gray-700 mb-2">Nome do
+                                Produto</label>
+                            <input type="text" id="productName" placeholder="Ex: Hambúrguer, Refrigerante, Batata Frita"
+                                class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition-colors">
+                        </div>
+                        <div>
+                            <label for="productPrice" class="block text-sm font-medium text-gray-700 mb-2">Preço
+                                (R$)</label>
+                            <input type="number" id="productPrice" placeholder="0,00" min="0" step="0.01"
+                                class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition-colors">
+                        </div>
+                        <div class="flex items-end">
+                            <button id="addProductButton"
+                                class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg">
+                                ➕ Adicionar Produto
+                            </button>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Categorias/Filtros</label>
+                            <div id="productFilterSelection"
+                                class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                                <span class="text-gray-500 text-sm">Carregando filtros...</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Imagem do Produto</label>
+                            <div class="space-y-3">
+                                <input type="file" id="productImage" accept="image/*"
+                                    class="w-full border-2 border-gray-300 rounded-lg px-4 py-2 focus:border-blue-500 focus:outline-none transition-colors">
+                                <div id="imagePreview" class="hidden mt-2">
+                                    <img id="previewImage" src="" alt="Preview"
+                                        class="max-w-xs max-h-48 rounded-lg border-2 border-gray-200">
+                                    <button type="button" onclick="clearImagePreview()"
+                                        class="mt-2 text-red-600 hover:text-red-800 text-sm">Remover imagem</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="messageArea" class="mt-4"></div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <span class="text-3xl mr-3">📋</span>
+                            Produtos Cadastrados
+                        </h2>
+                        <button
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center space-x-2"
+                            id="refreshButton">
+                            <i data-feather="refresh-cw" class="w-4 h-4"></i>
+                            <span>Atualizar Lista</span>
+                        </button>
+                    </div>
+
+                    <div id="productsTableContainer">
+                        <div class="text-center py-12 text-gray-500">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4">
+                            </div>
+                            Carregando produtos...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <custom-footer></custom-footer>
+
+    <!-- Edit Product Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Produto</h2>
+                <span class="close-button" onclick="closeEditModal()">&times;</span>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="editProductId">
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="editProductName">Nome do Produto</label>
+                    <input type="text" id="editProductName" placeholder="Nome do produto">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="editProductPrice">Preço (R$)</label>
+                    <input type="number" id="editProductPrice" placeholder="0,00" min="0" step="0.01">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="margin-bottom: 10px; display: block;">Categorias/Filtros</label>
+                    <div id="editProductFilterSelection"
+                        class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border-2 border-gray-200"
+                        style="max-height: 200px; overflow-y: auto;">
+                        <span class="text-gray-500 text-sm">Carregando filtros...</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editProductImage" style="margin-bottom: 10px; display: block;">Imagem do Produto</label>
+                    <input type="file" id="editProductImage" accept="image/*"
+                        class="w-full border-2 border-gray-300 rounded-lg px-4 py-2 mb-2">
+                    <div id="editImagePreview" class="hidden mt-2">
+                        <img id="editPreviewImage" src="" alt="Preview"
+                            class="max-w-xs max-h-48 rounded-lg border-2 border-gray-200 mb-2">
+                        <button type="button" onclick="clearEditImagePreview()"
+                            class="text-red-600 hover:text-red-800 text-sm">Remover imagem</button>
+                    </div>
+                    <div id="editCurrentImage" class="mt-2"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="modal-button secondary" onclick="closeEditModal()">Cancelar</button>
+                <button class="modal-button primary" onclick="saveProductEdit()">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Receipt Modal -->
+    <div id="editReciboModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>✏️ Editar Pedido</h2>
+                <span class="close-button" onclick="closeEditReciboModal()">&times;</span>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="editReciboId">
+                <div class="flex justify-between items-start mb-4 bg-gray-50 p-3 rounded-lg">
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg" id="editReciboTitle">Pedido #0000</h3>
+                        <p class="text-sm text-gray-500" id="editReciboDate">Data: --/--/----</p>
+                    </div>
+                    <div class="text-right">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Forma de Pagamento</label>
+                        <select id="editReciboPayment" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Pix">Pix</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-bold text-gray-700 mb-2 border-b pb-1">Itens do Pedido</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                <tr>
+                                    <th class="px-3 py-2">Qtd</th>
+                                    <th class="px-3 py-2">Produto</th>
+                                    <th class="px-3 py-2 text-right">Preço Un.</th>
+                                    <th class="px-3 py-2 text-right">Subtotal</th>
+                                    <th class="px-3 py-2 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="editReciboItemsList">
+                                <!-- Items will be populated here -->
+                            </tbody>
+                            <tfoot class="bg-gray-50 font-bold text-gray-900">
+                                <tr>
+                                    <td colspan="3" class="px-3 py-2 text-right">Total Estimado:</td>
+                                    <td class="px-3 py-2 text-right" id="editReciboTotal">R$ 0,00</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div
+                        class="mt-3 flex gap-2 items-center bg-gray-50 p-2 rounded border border-dashed border-gray-300">
+                        <select id="editReciboAddProduct"
+                            class="flex-1 border border-gray-300 rounded px-2 py-1 text-sm">
+                            <option value="">Selecione um produto para adicionar...</option>
+                        </select>
+                        <button onclick="addItemToEdit()"
+                            class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-3 rounded flex items-center gap-1">
+                            <i data-feather="plus"></i> Adicionar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="editReciboObs" class="font-bold text-gray-700">Observações</label>
+                    <textarea id="editReciboObs" rows="3"
+                        style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;"
+                        placeholder="Edite as observações do pedido..."></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="modal-button secondary" onclick="closeEditReciboModal()">Cancelar</button>
+                <button class="modal-button primary" onclick="saveReciboEdit()">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        const RECIBOS_API = window.location.protocol + '//' + window.location.host + '/api/recibos';
+        let currentEditReciboItems = []; // Store items being edited
+
+        // ============================================================================
+        // RECIBOS MANAGEMENT
+        // ============================================================================
+
+        async function loadRecibos() {
+            const container = document.getElementById('recibosContainer');
+            container.innerHTML = '<div class="text-center py-8 text-gray-500 col-span-full"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-2"></div>Carregando pedidos...</div>';
+
+            try {
+                const response = await fetch(RECIBOS_API);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const recibos = await response.json();
+
+                // Sort by ID descending (newest first)
+                recibos.sort((a, b) => b.id - a.id);
+
+                const activeRecibos = recibos; // Show all
+
+                if (activeRecibos.length === 0) {
+                    container.innerHTML = '<div class="text-center py-8 text-gray-500 col-span-full">Nenhum pedido no histórico.</div>';
+                    return;
+                }
+
+                container.innerHTML = activeRecibos.map(r => renderReciboCard(r)).join('');
+                feather.replace();
+
+            } catch (error) {
+                Logger.error('Erro ao carregar recibos', error);
+                container.innerHTML = '<div class="text-red-500 col-span-full text-center">Erro ao carregar pedidos.</div>';
+            }
+        }
+
+        function renderReciboCard(recibo) {
+            const date = new Date(recibo.dataCriacao).toLocaleString('pt-BR');
+            const totalFormatted = (recibo.total / 100).toFixed(2).replace('.', ',');
+            const itemsList = recibo.itens.map(i => `<li>${i.quantidade}x ${i.nome}</li>`).join('');
+            const obs = recibo.observacoes ? `<div class="mt-2 text-sm bg-yellow-50 p-2 rounded border border-yellow-200"><strong>Obs:</strong> ${recibo.observacoes}</div>` : '';
+
+            // Encode JSON safely for passing to function
+            const reciboJson = encodeURIComponent(JSON.stringify(recibo));
+
+            return `
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-bold text-xl text-orange-600">#${recibo.numeroChamada}</h3>
+                    <span class="text-xs text-gray-500">${date}</span>
+                </div>
+                
+                <div class="mb-3">
+                    <ul class="text-sm text-gray-700 list-disc list-inside">
+                        ${itemsList || '<li class="italic text-gray-400">Sem itens (Atendimento Preferencial)</li>'}
+                    </ul>
+                    ${obs}
+                </div>
+                
+                <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-200">
+                    <span class="font-bold text-gray-800">Total: R$ ${totalFormatted}</span>
+                    <div class="flex gap-2">
+                        <button onclick="concludeRecibo(${recibo.id}, '${recibo.numeroChamada}')" 
+                                class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded text-sm font-medium transition-colors flex items-center gap-1">
+                            ✅ Concluir
+                        </button>
+                        <button onclick="openEditReciboModalFromCard('${reciboJson}')" 
+                                class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-sm font-medium transition-colors">
+                            ✏️ Editar
+                        </button>
+                    </div>
+                </div>
+            </div>
+          `;
+        }
+
+        async function concludeRecibo(id, numeroChamada) {
+            if (!confirm(`Confirmar conclusão do pedido #${numeroChamada}? Ele será removido da lista.`)) return;
+
+            Logger.group(`Concluindo pedido #${numeroChamada}`);
+            try {
+                const response = await fetch(`${RECIBOS_API}/${id}`, { method: 'DELETE' });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                Logger.success(`Pedido #${numeroChamada} concluído (removido)`);
+                showMessage(`✅ Pedido #${numeroChamada} concluído com sucesso!`, 'success');
+                loadRecibos();
+
+            } catch (error) {
+                Logger.error(`Erro ao concluir pedido #${numeroChamada}`, error);
+                alert(`Erro ao concluir pedido: ${error.message}`);
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+
+        function openEditReciboModalFromCard(reciboJson) {
+            try {
+                const recibo = JSON.parse(decodeURIComponent(reciboJson));
+                openEditReciboModal(recibo);
+            } catch (e) {
+                Logger.error('Erro ao abrir modal', e);
+                alert('Erro ao abrir dados do pedido.');
+            }
+        }
+
+        async function clearRecibosHistory() {
+            if (!confirm('Tem certeza que deseja apagar TODO o histórico de pedidos? Esta ação não pode ser desfeita.')) return;
+
+            try {
+                const response = await fetch(`${RECIBOS_API}/limpar`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Falha ao limpar');
+
+                Logger.success('Histórico limpo completamente');
+                showMessage('🗑️ Histórico de pedidos apagado com sucesso!', 'success');
+                loadRecibos();
+            } catch (error) {
+                Logger.error('Erro ao limpar histórico', error);
+                alert('Erro ao limpar histórico: ' + error.message);
+            }
+        }
+
+        // ============================================================================
+        // EDIT RECIBO LOGIC
+        // ============================================================================
+
+        function openEditReciboModal(recibo) {
+            document.getElementById('editReciboId').value = recibo.id;
+            document.getElementById('editReciboTitle').textContent = `Pedido #${recibo.numeroChamada}`;
+            const date = new Date(recibo.dataCriacao).toLocaleString('pt-BR');
+            document.getElementById('editReciboDate').textContent = `Data: ${date}`;
+            document.getElementById('editReciboObs').value = recibo.observacoes || "";
+            document.getElementById('editReciboPayment').value = recibo.formaPagamento || "Dinheiro";
+
+            // clone items
+            currentEditReciboItems = JSON.parse(JSON.stringify(recibo.itens || []));
+
+            renderEditItems();
+            populateAddProductDropdown();
+
+            document.getElementById('editReciboModal').style.display = 'block';
+        }
+
+        function closeEditReciboModal() {
+            document.getElementById('editReciboModal').style.display = 'none';
+            currentEditReciboItems = [];
+        }
+
+        function renderEditItems() {
+            const tbody = document.getElementById('editReciboItemsList');
+            if (currentEditReciboItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-400 italic">Nenhum item neste pedido.</td></tr>';
+                document.getElementById('editReciboTotal').textContent = 'R$ 0,00';
+                return;
+            }
+
+            let total = 0;
+
+            tbody.innerHTML = currentEditReciboItems.map((item, index) => {
+                const subtotal = item.quantidade * item.preco;
+                total += subtotal;
+
+                return `
+                <tr class="bg-white border-b">
+                    <td class="px-3 py-2">
+                        <input type="number" min="1" value="${item.quantidade}" 
+                               onchange="updateItemQty(${index}, this.value)"
+                               class="w-16 border rounded px-1 py-0.5 text-center">
+                    </td>
+                    <td class="px-3 py-2 font-medium text-gray-900">${item.nome}</td>
+                    <td class="px-3 py-2 text-right">R$ ${(item.preco / 100).toFixed(2)}</td>
+                    <td class="px-3 py-2 text-right font-medium">R$ ${(subtotal / 100).toFixed(2)}</td>
+                    <td class="px-3 py-2 text-center">
+                        <button onclick="removeItemFromEdit(${index})" class="text-red-500 hover:text-red-700">
+                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>
+              `;
+            }).join('');
+
+            document.getElementById('editReciboTotal').textContent = 'R$ ' + (total / 100).toFixed(2).replace('.', ',');
+            feather.replace();
+        }
+
+        function updateItemQty(index, newQty) {
+            const qty = parseInt(newQty);
+            if (qty > 0) {
+                currentEditReciboItems[index].quantidade = qty;
+                renderEditItems();
+            }
+        }
+
+        function removeItemFromEdit(index) {
+            currentEditReciboItems.splice(index, 1);
+            renderEditItems();
+        }
+
+        function populateAddProductDropdown() {
+            const select = document.getElementById('editReciboAddProduct');
+
+            if (!currentProducts || currentProducts.length === 0) {
+                select.innerHTML = '<option value="">Sem produtos cadastrados</option>';
+                return;
+            }
+
+            select.innerHTML = '<option value="">Selecione um produto para adicionar...</option>' +
+                currentProducts.map(p => `<option value="${p.id}">${p.name} - R$ ${(p.priceInCents / 100).toFixed(2)}</option>`).join('');
+        }
+
+        function addItemToEdit() {
+            const select = document.getElementById('editReciboAddProduct');
+            const productId = parseInt(select.value);
+            if (!productId) return;
+
+            const product = currentProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            // Check if already exists in list, add qty
+            const existingItemIndex = currentEditReciboItems.findIndex(i => i.nome === product.name);
+
+            if (existingItemIndex >= 0) {
+                currentEditReciboItems[existingItemIndex].quantidade++;
+            } else {
+                currentEditReciboItems.push({
+                    nome: product.name,
+                    quantidade: 1,
+                    preco: product.priceInCents
+                });
+            }
+
+            renderEditItems();
+            select.value = ""; // Reset dropdown
+        }
+
+        async function saveReciboEdit() {
+            const id = document.getElementById('editReciboId').value;
+            const obs = document.getElementById('editReciboObs').value;
+            const payment = document.getElementById('editReciboPayment').value;
+
+            const payload = {
+                observacoes: obs,
+                formaPagamento: payment,
+                itens: currentEditReciboItems
+            };
+
+            // Logging the edit action
+            Logger.group(`Salvando edição do pedido #${document.getElementById('editReciboTitle').textContent.replace('Pedido #', '')}`);
+            Logger.log('Payload enviado:', payload);
+            Logger.log('Itens atualizados:', currentEditReciboItems);
+            Logger.log('Nova forma de pagamento:', payment);
+            Logger.log('Novas observações:', obs);
+
+            try {
+                const response = await fetch(`${RECIBOS_API}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const updated = await response.json();
+                Logger.success('Pedido atualizado com sucesso!', updated);
+                showMessage(`✅ Pedido #${updated.numeroChamada} atualizado com sucesso!`, 'success');
+                closeEditReciboModal();
+                loadRecibos();
+
+            } catch (error) {
+                Logger.error('Erro ao atualizar pedido', error);
+                alert('Erro ao atualizar pedido: ' + error.message);
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+
+        // Initialize recibos list
+        document.addEventListener('DOMContentLoaded', loadRecibos);
+
+
+        // ============================================================================
+        // SISTEMA DE LOGGING MINIMALISTA
+        // ============================================================================
+        const Logger = {
+            enabled: true,
+
+            log: function (message, data = null) {
+                if (!this.enabled) return;
+                if (data) {
+                    console.log(`%c[INFO] ${message}`, 'color: #3b82f6; font-weight: bold', data);
+                } else {
+                    console.log(`%c[INFO] ${message}`, 'color: #3b82f6; font-weight: bold');
+                }
+            },
+
+            success: function (message, data = null) {
+                if (!this.enabled) return;
+                if (data) {
+                    console.log(`%c[SUCCESS] ${message}`, 'color: #10b981; font-weight: bold', data);
+                } else {
+                    console.log(`%c[SUCCESS] ${message}`, 'color: #10b981; font-weight: bold');
+                }
+            },
+
+            error: function (message, error = null) {
+                if (!this.enabled) return;
+                if (error) {
+                    console.error(`%c[ERROR] ${message}`, 'color: #ef4444; font-weight: bold', error);
+                } else {
+                    console.error(`%c[ERROR] ${message}`, 'color: #ef4444; font-weight: bold');
+                }
+            },
+
+            warn: function (message, data = null) {
+                if (!this.enabled) return;
+                if (data) {
+                    console.warn(`%c[WARN] ${message}`, 'color: #f59e0b; font-weight: bold', data);
+                } else {
+                    console.warn(`%c[WARN] ${message}`, 'color: #f59e0b; font-weight: bold');
+                }
+            },
+
+            group: function (title) {
+                if (!this.enabled) return;
+                console.group(`%c${title}`, 'color: #6366f1; font-weight: bold');
+            },
+
+            groupEnd: function () {
+                if (!this.enabled) return;
+                console.groupEnd();
+            }
+        };
+
+        // ============================================================================
+        // APLICAÇÃO
+        // ============================================================================
+        const API_BASE = window.location.protocol + '//' + window.location.host + '/api/products';
+        const API_FILTERS = window.location.protocol + '//' + window.location.host + '/api/filters';
+        let currentProducts = [];
+        let currentFilters = [];
+
+        // Image preview functions
+        document.addEventListener('DOMContentLoaded', function () {
+            const imageInput = document.getElementById('productImage');
+            if (imageInput) {
+                imageInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const preview = document.getElementById('imagePreview');
+                            const previewImg = document.getElementById('previewImage');
+                            previewImg.src = e.target.result;
+                            preview.classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+
+        window.clearImagePreview = function () {
+            document.getElementById('productImage').value = '';
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('previewImage').src = '';
+        }
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function () {
+            feather.replace();
+            setupEventListeners();
+            setupEventListeners();
+            loadFilters();
+            loadProducts();
+            loadNotifications();
+            // Atualizar notificações a cada 30 segundos
+            setInterval(loadNotifications, 30000);
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('addProductButton').addEventListener('click', addProduct);
+            document.getElementById('refreshButton').addEventListener('click', loadProducts);
+            document.getElementById('refreshNotifications').addEventListener('click', loadNotifications);
+        }
+
+        // Load products from API
+        async function loadProducts() {
+            const container = document.getElementById('productsTableContainer');
+            container.innerHTML = '<div class="loading">Carregando produtos...</div>';
+            Logger.group('Carregando produtos');
+
+            try {
+                const response = await fetch(API_BASE);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                currentProducts = await response.json();
+                Logger.success(`${currentProducts.length} produto(s) carregado(s)`);
+                renderProductsTable();
+            } catch (error) {
+                container.innerHTML = `<div class="no-products">Erro ao carregar produtos: ${error.message}</div>`;
+                Logger.error('Falha ao carregar produtos', error);
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+
+        // Load filters
+        async function loadFilters() {
+            try {
+                const response = await fetch(API_FILTERS);
+                if (!response.ok) throw new Error('Falha ao carregar filtros');
+                currentFilters = await response.json();
+                renderFiltersManagement();
+                renderProductFilterSelection();
+            } catch (error) {
+                Logger.error('Erro ao carregar filtros', error);
+            }
+        }
+
+        function renderFiltersManagement() {
+            const container = document.getElementById('filtersList');
+            if (currentFilters.length === 0) {
+                container.innerHTML = '<span class="text-gray-400 text-sm italic p-2">Nenhum filtro cadastrado</span>';
+                return;
+            }
+            container.innerHTML = currentFilters.map(f => `
+                <div class="flex items-center gap-2 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm shadow-sm">
+                    <span class="font-medium text-gray-700">${f.name}</span>
+                    <button onclick="deleteFilter(${f.id}, '${f.name}')" class="text-red-500 hover:text-red-700 transition-colors">
+                        <i data-feather="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `).join('');
+            feather.replace();
+        }
+
+        function renderProductFilterSelection() {
+            const container = document.getElementById('productFilterSelection');
+            if (currentFilters.length === 0) {
+                container.innerHTML = '<span class="text-gray-400 text-sm italic">Crie filtros acima para categorizar o produto.</span>';
+                return;
+            }
+            container.innerHTML = currentFilters.map(f => `
+                <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border border-gray-200 hover:border-blue-400 transition-colors">
+                    <input type="checkbox" name="product-filter" value="${f.id}" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                    <span class="text-gray-700 font-medium">${f.name}</span>
+                </label>
+            `).join('');
+        }
+
+        // Make addFilter globally accessible
+        window.addFilter = async function () {
+            const input = document.getElementById('newFilterName');
+            const name = input.value.trim();
+            if (!name) return;
+
+            try {
+                const response = await fetch(API_FILTERS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                if (!response.ok) throw new Error('Erro ao criar filtro');
+
+                input.value = '';
+                showMessage('✅ Filtro criado com sucesso!', 'success');
+                await loadFilters();
+            } catch (error) {
+                Logger.error('Erro ao criar filtro', error);
+                alert('Erro ao criar filtro: ' + error.message);
+            }
+        }
+
+        // Make deleteFilter globally accessible
+        window.deleteFilter = async function (id, name) {
+            if (!confirm(`Excluir filtro "${name}"?`)) return;
+            try {
+                const response = await fetch(`${API_FILTERS}/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Erro ao excluir');
+                showMessage('🗑️ Filtro excluído!', 'success');
+                await loadFilters();
+            } catch (error) {
+                Logger.error('Erro ao excluir filtro', error);
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        // Render products table
+        function renderProductsTable() {
+            const container = document.getElementById('productsTableContainer');
+
+            if (currentProducts.length === 0) {
+                container.innerHTML = '<div class="no-products">Nenhum produto cadastrado ainda.</div>';
+                return;
+            }
+
+            const tableHtml = `
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${currentProducts.map((product, index) => {
+                const filtersJson = JSON.stringify(product.filters || []).replace(/"/g, '&quot;');
+                const productNameEscaped = product.name.replace(/'/g, "\\'");
+                const imageUrlEscaped = (product.imageUrl || '').replace(/'/g, "\\'");
+                return `
+                            <tr>
+                                <td>${product.id}</td>
+                                <td><span class="product-name">${product.name}</span></td>
+                                <td><span class="product-price">R$ ${(product.priceInCents / 100).toFixed(2)}</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="edit-button" onclick="openEditModalWithProduct(${product.id}, '${productNameEscaped}', ${product.priceInCents}, '${filtersJson}', '${imageUrlEscaped}')">
+                                            ✏️ Editar
+                                        </button>
+                                        <button class="delete-button" onclick="deleteProduct(${product.id}, '${productNameEscaped}')">
+                                            🗑️ Excluir
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+            }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHtml;
+        }
+
+        // Helper function to open edit modal with product data
+        window.openEditModalWithProduct = function (id, name, priceInCents, filtersJson, imageUrl) {
+            try {
+                const filters = JSON.parse(filtersJson.replace(/&quot;/g, '"'));
+                openEditModal(id, name, priceInCents, filters, imageUrl || null);
+            } catch (e) {
+                Logger.error('Erro ao parsear filtros', e);
+                openEditModal(id, name, priceInCents, [], imageUrl || null);
+            }
+        }
+
+        window.clearEditImagePreview = function () {
+            document.getElementById('editProductImage').value = '';
+            document.getElementById('editImagePreview').classList.add('hidden');
+            document.getElementById('editPreviewImage').src = '';
+        }
+
+        // Add new product
+        async function addProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const price = document.getElementById('productPrice').value;
+            const imageFile = document.getElementById('productImage').files[0];
+
+            // Clear previous messages
+            showMessage('', '');
+
+            // Validation
+            if (!name) {
+                showMessage('Nome do produto é obrigatório!', 'error');
+                return;
+            }
+
+            if (!price || parseFloat(price) <= 0) {
+                showMessage('Preço deve ser maior que zero!', 'error');
+                return;
+            }
+
+            const button = document.getElementById('addProductButton');
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = '⏳ Adicionando...';
+            Logger.group('Adicionando produto');
+
+            const selectedFilterIds = Array.from(document.querySelectorAll('input[name="product-filter"]:checked'))
+                .map(cb => ({ id: parseInt(cb.value) }));
+
+            let imageUrl = null;
+
+            // Upload image if provided
+            if (imageFile) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', imageFile);
+                    const uploadResponse = await fetch(window.location.protocol + '//' + window.location.host + '/api/images/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (uploadResponse.ok) {
+                        const uploadResult = await uploadResponse.json();
+                        imageUrl = uploadResult.imageUrl;
+                        Logger.success('Imagem enviada: ' + imageUrl);
+                    } else {
+                        Logger.warn('Erro ao enviar imagem, continuando sem imagem');
+                    }
+                } catch (error) {
+                    Logger.warn('Erro ao enviar imagem: ' + error.message);
+                }
+            }
+
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        priceInCents: Math.round(parseFloat(price) * 100),
+                        filters: selectedFilterIds,
+                        imageUrl: imageUrl
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${error}`);
+                }
+
+                const newProduct = await response.json();
+                Logger.success(`Produto criado: ${newProduct.name}`);
+                showMessage(`✅ Produto "${newProduct.name}" adicionado com sucesso!`, 'success');
+
+                // Clear form
+                document.getElementById('productName').value = '';
+                document.getElementById('productPrice').value = '';
+                document.getElementById('productImage').value = '';
+                clearImagePreview();
+
+                // Clear filter checkboxes
+                document.querySelectorAll('input[name="product-filter"]:checked').forEach(cb => cb.checked = false);
+
+                // Reload products
+                loadProducts();
+
+            } catch (error) {
+                Logger.error('Falha ao adicionar produto', error);
+                showMessage(`❌ Erro ao adicionar produto: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = originalText;
+                Logger.groupEnd();
+            }
+        }
+
+        // Delete product
+        async function deleteProduct(id, name) {
+            if (!confirm(`Tem certeza que deseja excluir o produto "${name}"?`)) {
+                return;
+            }
+
+            Logger.group('Excluindo produto');
+            try {
+                const response = await fetch(`${API_BASE}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                Logger.success(`Produto excluído: ${name}`);
+                showMessage(`🗑️ Produto "${name}" excluído com sucesso!`, 'success');
+                loadProducts();
+
+            } catch (error) {
+                Logger.error('Falha ao excluir produto', error);
+                showMessage(`❌ Erro ao excluir produto: ${error.message}`, 'error');
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+
+        // Edit product modal functions
+        function openEditModal(id, name, priceInCents, productFilters, imageUrl) {
+            document.getElementById('editProductId').value = id;
+            document.getElementById('editProductName').value = name;
+            document.getElementById('editProductPrice').value = (priceInCents / 100).toFixed(2);
+
+            // Render filter selection for editing
+            renderEditProductFilterSelection(productFilters || []);
+
+            // Show current image if exists
+            const currentImageDiv = document.getElementById('editCurrentImage');
+            const editImageInput = document.getElementById('editProductImage');
+            editImageInput.value = '';
+            clearEditImagePreview();
+
+            if (imageUrl) {
+                currentImageDiv.innerHTML = `
+                    <p class="text-sm text-gray-600 mb-2">Imagem atual:</p>
+                    <img src="${imageUrl}" alt="Imagem atual" class="max-w-xs max-h-48 rounded-lg border-2 border-gray-200">
+                `;
+            } else {
+                currentImageDiv.innerHTML = '';
+            }
+
+            // Add event listener for image preview
+            editImageInput.onchange = function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const preview = document.getElementById('editImagePreview');
+                        const previewImg = document.getElementById('editPreviewImage');
+                        previewImg.src = e.target.result;
+                        preview.classList.remove('hidden');
+                        currentImageDiv.innerHTML = ''; // Hide current image when new one is selected
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function renderEditProductFilterSelection(selectedFilters) {
+            const container = document.getElementById('editProductFilterSelection');
+            if (currentFilters.length === 0) {
+                container.innerHTML = '<span class="text-gray-400 text-sm italic">Crie filtros acima para categorizar o produto.</span>';
+                return;
+            }
+
+            // Get selected filter IDs
+            const selectedFilterIds = selectedFilters.map(f => f.id || f);
+
+            container.innerHTML = currentFilters.map(f => {
+                const isChecked = selectedFilterIds.includes(f.id);
+                return `
+                    <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border border-gray-200 hover:border-blue-400 transition-colors ${isChecked ? 'border-blue-500 bg-blue-50' : ''}">
+                        <input type="checkbox" name="edit-product-filter" value="${f.id}" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" ${isChecked ? 'checked' : ''}>
+                        <span class="text-gray-700 font-medium">${f.name}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            // Clear form
+            document.getElementById('editProductId').value = '';
+            document.getElementById('editProductName').value = '';
+            document.getElementById('editProductPrice').value = '';
+            document.getElementById('editProductImage').value = '';
+            document.getElementById('editProductFilterSelection').innerHTML = '';
+            document.getElementById('editCurrentImage').innerHTML = '';
+            clearEditImagePreview();
+        }
+
+        async function saveProductEdit() {
+            const id = document.getElementById('editProductId').value;
+            const name = document.getElementById('editProductName').value.trim();
+            const price = document.getElementById('editProductPrice').value;
+            const imageFile = document.getElementById('editProductImage').files[0];
+            const currentImageUrl = document.getElementById('editCurrentImage').querySelector('img')?.src || null;
+
+            // Validation
+            if (!name) {
+                alert('Nome do produto é obrigatório!');
+                return;
+            }
+
+            if (!price || parseFloat(price) <= 0) {
+                alert('Preço deve ser maior que zero!');
+                return;
+            }
+
+            // Get selected filters
+            const selectedFilterIds = Array.from(document.querySelectorAll('input[name="edit-product-filter"]:checked'))
+                .map(cb => ({ id: parseInt(cb.value) }));
+
+            let imageUrl = currentImageUrl;
+
+            // Upload new image if provided
+            if (imageFile) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', imageFile);
+                    const uploadResponse = await fetch(window.location.protocol + '//' + window.location.host + '/api/images/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (uploadResponse.ok) {
+                        const uploadResult = await uploadResponse.json();
+                        imageUrl = uploadResult.imageUrl;
+                        Logger.success('Nova imagem enviada: ' + imageUrl);
+                    } else {
+                        Logger.warn('Erro ao enviar nova imagem, mantendo imagem atual');
+                    }
+                } catch (error) {
+                    Logger.warn('Erro ao enviar nova imagem: ' + error.message);
+                }
+            }
+
+            Logger.group('Atualizando produto');
+            try {
+                const response = await fetch(`${API_BASE}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        priceInCents: Math.round(parseFloat(price) * 100),
+                        filters: selectedFilterIds,
+                        imageUrl: imageUrl
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${error}`);
+                }
+
+                const updatedProduct = await response.json();
+                Logger.success(`Produto atualizado: ${updatedProduct.name}`);
+                showMessage(`✏️ Produto "${updatedProduct.name}" atualizado com sucesso!`, 'success');
+
+                closeEditModal();
+                loadProducts();
+
+            } catch (error) {
+                Logger.error('Falha ao atualizar produto', error);
+                alert(`Erro ao atualizar produto: ${error.message}`);
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+
+        // Utility functions
+        function showMessage(message, type) {
+            const messageArea = document.getElementById('messageArea');
+            if (!message) {
+                messageArea.innerHTML = '';
+                return;
+            }
+
+            messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
+
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageArea.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        }
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeEditModal();
+            }
+        });
+
+        // Notifications management
+        async function loadNotifications() {
+            const container = document.getElementById('notificationsContainer');
+
+            try {
+                const response = await fetch(API_BASE + '/notificacoes-pendentes');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const notifications = await response.json();
+                Logger.log(`${notifications.length} notificação(ões) pendente(s)`);
+                renderNotifications(notifications);
+            } catch (error) {
+                Logger.error('Falha ao carregar notificações', error);
+                container.innerHTML = '<div class="text-red-600">Erro ao carregar notificações</div>';
+            }
+        }
+
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notificationsContainer');
+
+            if (notifications.length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-gray-600">Nenhuma notificação pendente</div>';
+                return;
+            }
+
+            const html = notifications.map(notification => {
+                const timestamp = new Date(notification.timestamp);
+                const timeString = timestamp.toLocaleString('pt-BR');
+
+                return `
+                    <div class="bg-white border border-red-200 rounded-lg p-4 mb-3 shadow-sm">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full mr-2">PENDENTE</span>
+                                    <span class="text-sm text-gray-500">${timeString}</span>
+                                </div>
+                                <p class="text-gray-800 font-medium">${notification.message}</p>
+                            </div>
+                            <button onclick="attendNotification('${notification.id}')"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition duration-200">
+                                ✅ Atender
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        async function attendNotification(notificationId) {
+            Logger.group('Atendendo notificação');
+            try {
+                const response = await fetch(`${API_BASE}/notificacao/${notificationId}/atender`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    Logger.success('Notificação atendida');
+                    alert('✅ Notificação atendida com sucesso!');
+                    loadNotifications(); // Recarregar notificações
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                Logger.error('Falha ao atender notificação', error);
+                alert('❌ Erro ao atender notificação: ' + error.message);
+            } finally {
+                Logger.groupEnd();
+            }
+        }
+    </script>
+</body>
+
+</html>
