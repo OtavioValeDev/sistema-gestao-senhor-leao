@@ -156,9 +156,17 @@ public class ReciboController {
     /**
      * Atualiza um recibo existente.
      *
-     * @param id     ID do recibo
-     * @param recibo Dados para atualização
-     * @return Recibo atualizado
+     * Permite editar itens, observações e forma de pagamento de um pedido
+     * já criado. Útil para correções de pedidos ou ajustes antes da conclusão.
+     *
+     * Lógica de negócio:
+     * - Valida se o recibo existe
+     * - Atualiza itens, observações e forma de pagamento
+     * - Recalcula o total automaticamente
+     *
+     * @param id     ID do recibo a ser atualizado
+     * @param recibo Dados atualizados (itens, observações, forma de pagamento)
+     * @return Recibo atualizado com novo total calculado
      */
     @PutMapping("/{id}")
     public ResponseEntity<Recibo> atualizar(@PathVariable Long id, @RequestBody Recibo recibo) {

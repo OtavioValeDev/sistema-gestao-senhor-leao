@@ -63,6 +63,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
+    /**
+     * Trata exceções de email já cadastrado.
+     *
+     * Captura tentativas de cadastrar funcionários com email duplicado.
+     * Retorna status HTTP 409 (Conflict) indicando que o recurso já existe.
+     *
+     * @param ex Exceção contendo mensagem de erro
+     * @return Resposta HTTP 409 com mensagem de conflito
+     */
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
     public ResponseEntity<String> EmailAlreadyRegisteredException(EmailAlreadyRegisteredException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());

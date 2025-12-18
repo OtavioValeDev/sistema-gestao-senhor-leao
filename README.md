@@ -68,6 +68,14 @@ cd sistema-gestao-senhor-leao
   - *User*: `sa`
   - *Password*: (deixe em branco)
 
+### Documentação para Desenvolvedores
+Para desenvolvedores que desejam contribuir ou entender a arquitetura do projeto, consulte o **[Guia do Desenvolvedor](DEVELOPER_GUIDE.md)** que contém:
+- Estrutura detalhada do projeto
+- Padrões de código e convenções
+- Fluxo de desenvolvimento
+- Guia de contribuição
+- Troubleshooting comum
+
 ## 🎯 Benefícios para o Negócio
 
 ### Eficiência Operacional

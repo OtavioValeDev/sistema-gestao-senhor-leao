@@ -55,20 +55,42 @@ public class FuncionarioService {
     /**
      * Atualiza os dados de um funcionário existente.
      *
-     * @param funcionario Dados atualizados.
-     * @param id          ID do funcionário a ser atualizado.
-     * @return O funcionário atualizado.
+     * Este método implementa um merge inteligente: apenas campos não-nulos
+     * são atualizados, preservando os valores existentes para campos não informados.
+     * Isso permite atualizações parciais sem perder dados já cadastrados.
+     *
+     * Lógica de negócio (merge inteligente):
+     * - Nome: atualiza se não-nulo, senão mantém o atual
+     * - Email: atualiza se não-nulo, senão mantém o atual
+     * - Turno: atualiza se não-nulo, senão mantém o atual
+     * - Senha: atualiza se não-nula, senão mantém a atual
+     * - Salário: atualiza se diferente de 0, senão mantém o atual
+     *            (0 é usado como indicador de "não informado")
+     *
+     * IMPORTANTE: O salário usa 0 como valor sentinela para indicar
+     * "não atualizar". Se o salário atual for realmente 0, será mantido.
+     * Para atualizar para 0, envie explicitamente 0.01 ou valor mínimo.
+     *
+     * @param funcionario Dados atualizados (campos null são ignorados)
+     * @param id          ID do funcionário a ser atualizado
+     * @return Funcionário atualizado com merge dos dados antigos e novos
+     * @throws RuntimeException Se o funcionário não for encontrado
      */
     public Funcionario update(Funcionario funcionario, long id) {
+        // Buscar funcionário existente (lança exceção se não encontrado)
         Funcionario funcionarioAntigo = findById(id);
+        
+        // Criar novo objeto com merge inteligente usando Builder Pattern
+        // Operador ternário: novo_valor != null ? novo_valor : valor_antigo
         Funcionario funcionarioAtualizado = Funcionario.builder()
                 .nome(funcionario.getNome() != null ? funcionario.getNome() : funcionarioAntigo.getNome())
                 .email(funcionario.getEmail() != null ? funcionario.getEmail() : funcionarioAntigo.getEmail())
                 .turno(funcionario.getTurno() != null ? funcionario.getTurno() : funcionarioAntigo.getTurno())
                 .senha(funcionario.getSenha() != null ? funcionario.getSenha() : funcionarioAntigo.getSenha())
                 .salario(funcionario.getSalario() != 0 ? funcionario.getSalario() : funcionarioAntigo.getSalario())
-                .id(funcionarioAntigo.getId())
+                .id(funcionarioAntigo.getId())  // Preserva o ID original
                 .build();
+        
         return funcionarioRepo.save(funcionarioAtualizado);
     }
 

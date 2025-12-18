@@ -126,13 +126,32 @@ public class ReciboService {
     /**
      * Atualiza as observações, forma de pagamento e itens de um recibo.
      *
+     * Este método permite editar um pedido já criado, útil para correções
+     * ou ajustes antes da conclusão. A lógica implementa um merge inteligente:
+     * apenas campos não-nulos são atualizados, preservando dados existentes.
+     *
+     * Lógica de negócio:
+     * 1. Busca o recibo existente no banco
+     * 2. Atualiza observações se fornecidas
+     * 3. Atualiza forma de pagamento se fornecida
+     * 4. Se novos itens forem fornecidos:
+     *    - Substitui a lista completa de itens
+     *    - Recalcula automaticamente o total (soma de todos os subtotais)
+     * 5. Persiste as alterações no banco
+     *
+     * IMPORTANTE: O recálculo do total é automático quando itens são atualizados.
+     * Isso garante consistência dos dados mesmo após edições.
+     *
      * @param id         ID do recibo a ser atualizado
-     * @param novosDados Dados novos
-     * @return Recibo atualizado
+     * @param novosDados Dados novos (campos null são ignorados)
+     * @return Recibo atualizado com novo total calculado
+     * @throws RuntimeException Se o recibo não for encontrado
      */
     public Recibo updateRecibo(@NonNull Long id, Recibo novosDados) {
+        // Buscar recibo existente (lança exceção se não encontrado)
         Recibo recibo = getReciboById(id);
 
+        // Merge inteligente: atualiza apenas campos não-nulos
         if (novosDados.getObservacoes() != null) {
             recibo.setObservacoes(novosDados.getObservacoes());
         }
@@ -140,14 +159,15 @@ public class ReciboService {
             recibo.setFormaPagamento(novosDados.getFormaPagamento());
         }
 
-        // Atualizar itens se fornecidos
+        // Atualizar itens se fornecidos (substitui lista completa)
         if (novosDados.getItens() != null && !novosDados.getItens().isEmpty()) {
             recibo.setItens(novosDados.getItens());
 
-            // Recalcular total
+            // Recalcular total automaticamente após mudança de itens
+            // Usa Stream API para somar todos os subtotais (quantidade × preço)
             int novoTotal = recibo.getItens().stream()
-                    .mapToInt(ItemCompra::getSubtotal)
-                    .sum();
+                    .mapToInt(ItemCompra::getSubtotal)  // Extrai subtotal de cada item
+                    .sum();                              // Soma todos os subtotais
             recibo.setTotal(novoTotal);
         }
 
