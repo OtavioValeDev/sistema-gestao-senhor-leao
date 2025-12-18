@@ -246,6 +246,26 @@
 </head>
 
 <body class="bg-gray-100">
+
+    <!-- Global Message Area -->
+    <div id="globalMessageArea" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg border-l-4 p-4 max-w-md mx-auto">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="text-2xl" id="globalMessageIcon"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium" id="globalMessageText"></p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="hideGlobalMessage()" class="text-gray-400 hover:text-gray-600">
+                        <i data-feather="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <main class="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50 flex items-center justify-center p-4">
         <div class="w-full max-w-7xl space-y-8">
             <!-- Header -->
@@ -347,13 +367,21 @@
                         </div>
 
                         <!-- Preferential Service Section -->
-                        <div class="mt-6 p-4 rounded-xl text-center">
-                            <img id="preferentialButton" src="/preferential-service.svg"
-                                alt="Acessibilidade - Atendimento Preferencial"
-                                class="cursor-pointer hover:opacity-90 hover:scale-105 transition-all duration-200 mx-auto shadow-md"
-                                style="width: 200px; height: 200px; border-radius: 25px;"
+                        <div class="mt-6">
+                            <button id="preferentialButton"
                                 onclick="requestPreferentialService()"
-                                title="Clique para solicitar atendimento preferencial">
+                                title="Clique para solicitar atendimento preferencial"
+                                class="w-full bg-gradient-to-br from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-6 px-4 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-xl border-4 border-white">
+                                <div class="flex flex-col items-center space-y-3">
+                                    <div class="bg-white bg-opacity-30 rounded-full p-4">
+                                        <i data-feather="users" class="w-8 h-8"></i>
+                                    </div>
+                                    <div class="text-center">
+                                        <h3 class="text-lg font-bold mb-1">Atendimento Preferencial</h3>
+                                        <p class="text-sm opacity-90">Clique para prioridade no atendimento</p>
+                                    </div>
+                                </div>
+                            </button>
                         </div>
                     </section>
                 </div>
@@ -734,7 +762,7 @@
                 Logger.success('Aplicação inicializada');
             } catch (error) {
                 Logger.error('Erro na inicialização', error);
-                alert('Erro ao inicializar a aplicação: ' + error.message);
+                showGlobalMessage('Erro ao inicializar a aplicação: ' + error.message, 'error');
             } finally {
                 Logger.groupEnd();
             }
@@ -1325,7 +1353,7 @@
             } catch (error) {
                 Logger.error('Falha ao processar pedido', error);
                 Logger.groupEnd();
-                alert('Erro ao processar o pedido. Tente novamente.');
+                showGlobalMessage('Erro ao processar o pedido. Tente novamente.', 'error');
             } finally {
                 checkoutBtn.disabled = false;
                 checkoutBtn.textContent = originalText;
@@ -1418,7 +1446,7 @@
 
                 if (result.success) {
                     Logger.success(`Notificação enviada (ID: ${result.notificationId})`);
-                    alert('✅ Solicitação de atendimento preferencial enviada com sucesso!\n\nAguarde ser chamado pelo sistema de som.');
+                    showGlobalMessage('Solicitação de atendimento preferencial enviada com sucesso! Aguarde ser chamado pelo sistema de som.', 'success');
                     // Mantém desabilitado após sucesso
                     button.style.opacity = '0.5';
                     button.title = 'Solicitação já enviada';
@@ -1428,7 +1456,7 @@
 
             } catch (error) {
                 Logger.error('Falha ao solicitar atendimento preferencial', error);
-                alert('❌ Erro ao solicitar atendimento preferencial: ' + error.message);
+                showGlobalMessage('Erro ao solicitar atendimento preferencial: ' + error.message, 'error');
                 button.style.opacity = originalOpacity || '1';
                 button.style.cursor = originalCursor || 'pointer';
                 button.style.pointerEvents = 'auto';
@@ -1522,7 +1550,7 @@
         async function startPixPayment() {
             // 1. Validate Cart
             if (cart.length === 0) {
-                alert("Seu carrinho está vazio!");
+                showGlobalMessage("Seu carrinho está vazio!", "warning");
                 return;
             }
 
@@ -1553,7 +1581,7 @@
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     console.error("❌ ERRO DETALHADO:", errorData);
-                    alert(`Erro no Pagamento: ${errorData.error || 'Verifique o console'}`);
+                    showGlobalMessage(`Erro no Pagamento: ${errorData.error || 'Verifique o console'}`, 'error');
                     throw new Error(errorData.error || 'Falha ao gerar Pix');
                 }
 
@@ -1588,7 +1616,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert("Erro ao gerar Pix. Tente novamente.");
+                showGlobalMessage("Erro ao gerar Pix. Tente novamente.", 'error');
                 modal.classList.add('hidden');
             }
         }
@@ -1692,11 +1720,70 @@
 
             } catch (error) {
                 console.error('Error processing order:', error);
-                alert('Erro ao processar pedido. Por favor, tente novamente.');
+                showGlobalMessage('Erro ao processar pedido. Por favor, tente novamente.', 'error');
             } finally {
                 // Reset flag after delay to allow modal interaction but prevent immediate double-submit
                 setTimeout(() => { isCheckoutProcessing = false; }, 2000);
             }
+        }
+
+        // ============================================================================
+        // SISTEMA DE NOTIFICAÇÕES GLOBAIS
+        // ============================================================================
+
+        function showGlobalMessage(message, type = 'info') {
+            const messageArea = document.getElementById('globalMessageArea');
+            const messageText = document.getElementById('globalMessageText');
+            const messageIcon = document.getElementById('globalMessageIcon');
+            const container = messageArea.querySelector('.bg-white');
+
+            // Set message text
+            messageText.textContent = message;
+
+            // Set icon and colors based on type
+            let iconName = 'info';
+            let borderColor = 'border-blue-500';
+            let iconColor = 'text-blue-500';
+
+            switch (type) {
+                case 'success':
+                    iconName = 'check-circle';
+                    borderColor = 'border-green-500';
+                    iconColor = 'text-green-500';
+                    break;
+                case 'error':
+                    iconName = 'alert-circle';
+                    borderColor = 'border-red-500';
+                    iconColor = 'text-red-500';
+                    break;
+                case 'warning':
+                    iconName = 'alert-triangle';
+                    borderColor = 'border-yellow-500';
+                    iconColor = 'text-yellow-500';
+                    break;
+                default:
+                    iconName = 'info';
+                    borderColor = 'border-blue-500';
+                    iconColor = 'text-blue-500';
+            }
+
+            // Update styles
+            container.className = `bg-white rounded-lg shadow-lg border-l-4 ${borderColor} p-4 max-w-md mx-auto`;
+            messageIcon.className = `text-2xl ${iconColor}`;
+            messageIcon.setAttribute('data-feather', iconName);
+
+            // Show message
+            messageArea.classList.remove('hidden');
+            feather.replace();
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                hideGlobalMessage();
+            }, 5000);
+        }
+
+        function hideGlobalMessage() {
+            document.getElementById('globalMessageArea').classList.add('hidden');
         }
     </script>
 </body>

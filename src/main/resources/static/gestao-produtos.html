@@ -344,6 +344,25 @@
         </div>
     </nav>
 
+    <!-- Global Message Area -->
+    <div id="globalMessageArea" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg border-l-4 p-4 max-w-md mx-auto">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="text-2xl" id="globalMessageIcon"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium" id="globalMessageText"></p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="hideGlobalMessage()" class="text-gray-400 hover:text-gray-600">
+                        <i data-feather="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <main class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4 pt-20">
         <div class="w-full max-w-6xl space-y-8">
             <!-- Header -->
@@ -733,7 +752,7 @@
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 Logger.success(`Pedido #${numeroChamada} concluído (removido)`);
-                showMessage(`✅ Pedido #${numeroChamada} concluído com sucesso!`, 'success');
+                showGlobalMessage(`Pedido #${numeroChamada} concluído com sucesso!`, 'success');
                 loadRecibos();
 
             } catch (error) {
@@ -762,7 +781,7 @@
                 if (!response.ok) throw new Error('Falha ao limpar');
 
                 Logger.success('Histórico limpo completamente');
-                showMessage('🗑️ Histórico de pedidos apagado com sucesso!', 'success');
+                showGlobalMessage('Histórico de pedidos apagado com sucesso!', 'success');
                 loadRecibos();
             } catch (error) {
                 Logger.error('Erro ao limpar histórico', error);
@@ -912,7 +931,7 @@
 
                 const updated = await response.json();
                 Logger.success('Pedido atualizado com sucesso!', updated);
-                showMessage(`✅ Pedido #${updated.numeroChamada} atualizado com sucesso!`, 'success');
+                showGlobalMessage(`Pedido #${updated.numeroChamada} atualizado com sucesso!`, 'success');
                 closeEditReciboModal();
                 loadRecibos();
 
@@ -1485,7 +1504,63 @@
             }
         }
 
-        // Utility functions
+        // Global message functions
+        function showGlobalMessage(message, type = 'info') {
+            const messageArea = document.getElementById('globalMessageArea');
+            const messageText = document.getElementById('globalMessageText');
+            const messageIcon = document.getElementById('globalMessageIcon');
+            const container = messageArea.querySelector('.bg-white');
+
+            // Set message text
+            messageText.textContent = message;
+
+            // Set icon and colors based on type
+            let iconName = 'info';
+            let borderColor = 'border-blue-500';
+            let iconColor = 'text-blue-500';
+
+            switch (type) {
+                case 'success':
+                    iconName = 'check-circle';
+                    borderColor = 'border-green-500';
+                    iconColor = 'text-green-500';
+                    break;
+                case 'error':
+                    iconName = 'alert-circle';
+                    borderColor = 'border-red-500';
+                    iconColor = 'text-red-500';
+                    break;
+                case 'warning':
+                    iconName = 'alert-triangle';
+                    borderColor = 'border-yellow-500';
+                    iconColor = 'text-yellow-500';
+                    break;
+                default:
+                    iconName = 'info';
+                    borderColor = 'border-blue-500';
+                    iconColor = 'text-blue-500';
+            }
+
+            // Update styles
+            container.className = `bg-white rounded-lg shadow-lg border-l-4 ${borderColor} p-4 max-w-md mx-auto`;
+            messageIcon.className = `text-2xl ${iconColor}`;
+            messageIcon.setAttribute('data-feather', iconName);
+
+            // Show message
+            messageArea.classList.remove('hidden');
+            feather.replace();
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                hideGlobalMessage();
+            }, 5000);
+        }
+
+        function hideGlobalMessage() {
+            document.getElementById('globalMessageArea').classList.add('hidden');
+        }
+
+        // Local message functions (for product operations)
         function showMessage(message, type) {
             const messageArea = document.getElementById('messageArea');
             if (!message) {
@@ -1588,7 +1663,7 @@
                 const result = await response.json();
                 if (result.success) {
                     Logger.success('Notificação atendida');
-                    alert('✅ Notificação atendida com sucesso!');
+                    showGlobalMessage('Notificação atendida com sucesso!', 'success');
                     loadNotifications(); // Recarregar notificações
                 } else {
                     throw new Error(result.message);
