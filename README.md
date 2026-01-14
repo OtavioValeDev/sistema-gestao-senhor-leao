@@ -223,5 +223,17 @@ MERCADO_PAGO_ACCESS_TOKEN=token
 ```
 
 ---
+## Integrantes do Projeto
 
+<p align="center">
+Otávio Augusto | Matheus Bonato | David | Pedro Taroco | Pablo
+</p>
+---
+## Agradecimento Especial
+
+<p align="center">
+Em agradecimento ao professor <strong>Jefferson Savidotti</strong>,<br>
+pelo apoio, orientação e contribuição ao desenvolvimento do projeto.
+</p>
+---
 **Desenvolvido por:** Aristocracia do Java
